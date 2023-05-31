@@ -1,0 +1,41 @@
+
+body{
+	margin-top:20px;
+	background: #a7a7a7;
+	
+  }
+  
+  .todo-list {
+	 margin: 10px 0
+  }
+  
+  .todo-list .todo-item {
+	padding: 15px;
+	margin: 5px 0;
+	border-radius: 0;
+  }
+  
+  div.checker {
+	width: 18px;
+	height: 18px
+  }
+  
+  div.checker input{
+	width: 18px;
+	height: 18px
+  }
+  
+  div.checker {
+	display: inline-block;
+	vertical-align: middle;
+  }
+  
+  .done {
+	text-decoration: line-through;
+  }
+
+  .detail-lg {
+	height: 150px;
+	width: 300px;
+  }
+  
