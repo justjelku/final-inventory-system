@@ -92,7 +92,6 @@ const EditProduct = ({ product, id }) => {
     }
   };
 
-
   const handlePriceChange = (e) => {
     setPrice(e.target.value);
   };
@@ -105,7 +104,6 @@ const EditProduct = ({ product, id }) => {
     const file = event.target?.files[0];
     setImage(file);
   };
-
 
   return (
     <>
@@ -139,7 +137,6 @@ const EditProduct = ({ product, id }) => {
               </button>
             </div>
             <div className="modal-body">
-
               <div className="row">
                 {/* <div className="row">
                   <div className="col">
@@ -314,19 +311,28 @@ const EditProduct = ({ product, id }) => {
                 </div>
                 <div className='col px-md-5 mt-3'>
                   <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Details</label>
-                    <input
+                    <label for="exampleFormControlTextarea1" class="form-label">Details</label>
+                    <textarea 
+                    type="text"
+                    value={details}
+                    onChange={(e) => setDetails(e.target.value)}
+                    class="form-control" 
+                    placeholder="Product details"
+                    id="exampleFormControlTextarea1" 
+                    rows="3"
+                    >
+                    </textarea>
+                    {/* <input
                       type="text"
                       value={details}
                       onChange={(e) => setDetails(e.target.value)}
-                      className="form-control detail-lg p-3"
+                      className="form-control detail-lg"
                       placeholder="Product details"
-                    />
+                    /> */}
                   </div>
 
                 </div>
               </div>
-
             </div>
             <div className="modal-footer">
               <button

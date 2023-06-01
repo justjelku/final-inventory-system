@@ -29,10 +29,10 @@ const Product = () => {
 
 	return (
 		<>
-			<div className="container m-10">
-				<div className="row m-100">
-					<div className="col-md-12">
-						<div className="card card-white">
+			<div className="container mt-10 d-flex align-items-start">
+				<div className="row m-100 m-auto">
+					<div className="col-md-12 m-auto d-flex">
+						<div className="card card-white d-flex">
 							<div className="card-body">
 								<button
 									data-bs-toggle="modal"
@@ -83,7 +83,7 @@ const Product = () => {
 													}}
 													id={id}
 												/>
-												<button type="button" className="btn btn-outline-danger ms-3" onClick={() => deleteProduct(id)}
+												<button type="button" className="btn btn-outline-danger ms-3 m-3" onClick={() => deleteProduct(id)}
 												>Delete</button>
 											</span>
 										</div>

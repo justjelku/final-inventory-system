@@ -29,7 +29,7 @@ const SignInPage = () => {
   
     try {
       await signIn(email, password);
-      navigate('/app');
+      navigate('/');
     } catch (error) {
       if (error.code === 'auth/user-not-found') {
         setError('User not found. Please check your email or sign up.');

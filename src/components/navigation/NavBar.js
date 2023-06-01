@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, {useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BoxArrowRight } from 'react-bootstrap-icons';
 import { NavLink } from 'react-router-dom';
 import { Modal, Button, Form, Popover } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
-import UserProfilePopover from '../pages/user/profile/ProfilePopOver';
 import Sidebar from './SideBar';
 import { List } from 'react-bootstrap-icons';
 
@@ -12,6 +11,43 @@ const NavBar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [showPopover, setShowPopover] = useState(true);
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    // Function to check if the current view is mobile
+    const checkMobileView = () => {
+      const mobileView = window.matchMedia('(max-width: 1000px)').matches;
+      setIsMobileView(mobileView);
+    };
+
+    // Initial check when the component mounts
+    checkMobileView();
+
+    // Listen for window resize events to update the view
+    window.addEventListener('resize', checkMobileView);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener('resize', checkMobileView);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Function to check if the page is scrolled
+    const checkScroll = () => {
+      const scrolled = window.pageYOffset > 0;
+      setIsScrolled(scrolled);
+    };
+
+    // Listen for scroll events to update the view
+    window.addEventListener('scroll', checkScroll);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener('scroll', checkScroll);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -23,9 +59,13 @@ const NavBar = () => {
     }
   };
 
+  
+
   return (
-    <div className="navbar sticky-top navbar-light bg-light d-flex align-items-start m-1">
-      <button
+    <div 
+    className={`navbar sticky-top navbar-white bg-white d-flex align-items-start${isScrolled ? ' scrolled' : ''}`}>
+      {isMobileView && (
+        <button
         class="btn btn-outline-secondary me-3 m-1"
         type="button"
         data-bs-toggle="offcanvas"
@@ -35,6 +75,7 @@ const NavBar = () => {
         <List size={24}
         />
       </button>
+      )}
       <div
         class="offcanvas offcanvas-start"
         data-bs-scroll="true"
@@ -56,34 +97,34 @@ const NavBar = () => {
               display: 'flex'
             }}
           />
-          <button 
-          type="button" 
-          class="btn-close text-reset" 
-          data-bs-dismiss="offcanvas" 
-          aria-label="Close">
+          <button
+            type="button"
+            class="btn-close text-reset"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close">
           </button>
         </div>
         <div class="offcanvas-body">
           <Sidebar />
         </div>
       </div>
-      <NavLink 
-      to="/app" 
-      className="me-auto mt-2"
+      <NavLink
+        to="/"
+        className="me-auto mt-2"
       >
         Shoe Inventory Management System
       </NavLink>
-      <form className="d-flex m-1">
+      <form className="d-flex m-1 justify-content-center align-items-center">
         <input className="form-control me-3" type="search" placeholder="Search" aria-label="Search" />
         <button className="btn btn-outline-success" type="submit">Search</button>
       </form>
-      <button
+      {/* <button
         className="nav-link me-3 m-1"
         type="button"
         onClick={handleLogout}
       >
         <BoxArrowRight size={20} className="me-2" />
-      </button>
+      </button> */}
     </div>
   );
 };

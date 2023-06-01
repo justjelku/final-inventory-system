@@ -1,12 +1,17 @@
 import { db, storage } from '../../../../../firebase';
 import React, { useState, useEffect } from 'react';
-import {
-  updateDoc,
-  doc,
-} from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 
 const StockOut = ({ product, id }) => {
+  const collectionRef = collection(
+    db,
+    'todos',
+    'f3adC8WShePwSBwjQ2yj',
+    'basic_users',
+    'm831SaFD4oCioO6nfTc7',
+    'stock_out'
+  );
   const [productTitle, setProductTitle] = useState(product.productTitle);
   const [size, setSize] = useState(product.productSize);
   const [quantity, setQuantity] = useState(product.productQuantity);
@@ -21,7 +26,16 @@ const StockOut = ({ product, id }) => {
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
+  const [showModal, setShowModal] = useState(false);
 
+
+  const handleShowModal = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
 
   const updateProduct = async (e) => {
     e.preventDefault();
@@ -67,7 +81,7 @@ const StockOut = ({ product, id }) => {
         id
       );
 
-      const productData = {
+      const stockInData = {
         productTitle,
         productSize: parseInt(size),
         productQuantity: parseInt(quantity),
@@ -78,6 +92,22 @@ const StockOut = ({ product, id }) => {
         sizeSystem,
         productDetails: details,
         productPrice: parseInt(price),
+        createdtime: serverTimestamp(),
+        updatedtime: serverTimestamp()
+      };
+
+      const productData = {
+        productTitle,
+        productSize: parseInt(size),
+        productQuantity: parseInt(product.productQuantity) - parseInt(quantity),
+        color,
+        branch,
+        category,
+        productBrand: brand,
+        sizeSystem,
+        productDetails: details,
+        productPrice: parseInt(price),
+        updatedtime: serverTimestamp()
       };
 
       if (downloadURL) {
@@ -85,12 +115,12 @@ const StockOut = ({ product, id }) => {
       }
 
       await updateDoc(productDocumentRef, productData);
+      await addDoc(collectionRef, stockInData);
       window.location.reload();
     } catch (err) {
       console.log(err);
     }
   };
-
 
   const handlePriceChange = (e) => {
     setPrice(e.target.value);
@@ -112,22 +142,24 @@ const StockOut = ({ product, id }) => {
         type="button"
         className="btn btn-outline-warning m-1"
         data-bs-toggle="modal"
-        data-bs-target={`#id${id}`}>
+        data-bs-target={`#stockOut${id}`}
+        onClick={handleShowModal}
+        >
         Stock Out
       </button>
 
       <div
         className="modal fade"
-        id={`id${id}`}
+        id={`stockOut${id}`}
         tabIndex="-1"
-        aria-labelledby="editLabel"
+        aria-labelledby="stockOutLabel"
         aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-lg">
           <form className="modal-content">
             <div className="modal-header">
               <h5
                 className="modal-title"
-                id="editLabel">
+                id="stockOut">
                 Stock Out
               </h5>
               <button
@@ -313,14 +345,17 @@ const StockOut = ({ product, id }) => {
                 </div>
                 <div className='col px-md-5 mt-3'>
                   <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Details</label>
-                    <input
-                      type="text"
-                      value={details}
-                      onChange={(e) => setDetails(e.target.value)}
-                      className="form-control detail-lg p-3"
-                      placeholder="Product details"
-                    />
+                  <label for="exampleFormControlTextarea1" class="form-label">Details</label>
+                    <textarea 
+                    type="text"
+                    value={details}
+                    onChange={(e) => setDetails(e.target.value)}
+                    class="form-control" 
+                    placeholder="Product details"
+                    id="exampleFormControlTextarea1" 
+                    rows="3"
+                    >
+                    </textarea>
                   </div>
 
                 </div>

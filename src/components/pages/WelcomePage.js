@@ -3,6 +3,7 @@ import { db } from '../../firebase';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import { FaUser } from 'react-icons/fa';
 import {
   getDocs,
   collection,
@@ -24,6 +25,18 @@ const WelcomePage = () => {
   const [showModal, setShowModal] = useState(false)
   const [user, setUser] = useState(null);
   const [photo, setPhoto] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
   useEffect(() => {
     if (userId) {
@@ -48,9 +61,7 @@ const WelcomePage = () => {
   useEffect(() => {
     if (userId) {
       const unsubscribe = onSnapshot(
-        query(
-          collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'profilePhoto'),
-        ),
+        query(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'profilePhoto')),
         (querySnapshot) => {
           let userPhoto = [];
           querySnapshot.forEach((doc) => {
@@ -63,19 +74,6 @@ const WelcomePage = () => {
       return () => unsubscribe();
     }
   }, [userId]);
-
-
-  useEffect(() => {
-    const unsubscribeAuth = firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        setUserId(null);
-      }
-    });
-
-    return () => unsubscribeAuth();
-  }, []);
 
   useEffect(() => {
     if (userId) {
@@ -118,7 +116,6 @@ const WelcomePage = () => {
       getTotalQuantities();
     }
   }, [userId]); 
-
 
   useEffect(() => {
     const getTotalStockIn = async () => {
@@ -190,68 +187,59 @@ const WelcomePage = () => {
   
   
   return (
-    <div className="m-3">
-      {user && (
-          <>
-          <h5 className='m-3'> Welcome back, {user['first name']} {user['last name']}</h5>
-          </>
-        )}
-      <div className="row m-3">
-        <div className="col-sm-6 col-lg-3 mb-3">
-          <div className="card bg-primary text-white">
-            <div className="card-body d-flex align-items-center">
-              <div className="d-flex align-items-center">
-                <div className="dashboard__icon me-2 ">
-                  <BsClock size={40}/>
-                </div>
-                <div className="dashboard__text align-items-center">
-                  <h3 className="dashboard__title d-flex align-items-center">Product In</h3>
-                  <p className="dashboard__value">{productIn}</p>
+    <div className="container mt-4">
+      <div className="row">
+        <div className="col-lg-8">
+          <div className="row">
+            <div className="col-md-6">
+              <div className="card mb-4">
+                <div className="card-body">
+                  <div className="d-flex align-items-center">
+                    <BsGraphUp className="fs-5 me-3 text-primary" />
+                    <div>
+                      <h5 className="card-title">Total Quantities</h5>
+                      <p className="card-text">{totalQuantities}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div className="col-sm-6 col-lg-3 mb-3">
-          <div className="card bg-secondary text-white">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <div className="dashboard__icon me-2">
-                  <BsGraphUp size={40}/>
-                </div>
-                <div className="dashboard__text">
-                  <h3 className="dashboard__title">Stock In</h3>
-                  <p className="dashboard__value">{stockIn}</p>
+            <div className="col-md-6">
+              <div className="card mb-4">
+                <div className="card-body">
+                  <div className="d-flex align-items-center">
+                    <BsClock className="fs-2 me-3 text-primary" />
+                    <div>
+                      <h5 className="card-title">Stock In</h5>
+                      <p className="card-text">{stockIn}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div className="col-sm-6 col-lg-3 mb-3">
-          <div className="card bg-success text-white">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <div className="dashboard__icon me-2">
-                  <BsCart size={40}/>
-                </div>
-                <div className="dashboard__text">
-                  <h3 className="dashboard__title">Stock Out</h3>
-                  <p className="dashboard__value">{productOut}</p>
+            <div className="col-md-6">
+              <div className="card mb-4">
+                <div className="card-body">
+                  <div className="d-flex align-items-center">
+                    <BsClipboardData className="fs-2 me-3 text-primary" />
+                    <div>
+                      <h5 className="card-title">Product Out</h5>
+                      <p className="card-text">{productOut}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div className="col-sm-6 col-lg-3 mb-3">
-          <div className="card bg-info text-white">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <div className="dashboard__icon me-2">
-                  <BsClipboardData size={40}/>
-                </div>
-                <div className="dashboard__text">
-                  <h3 className="dashboard__title">Total Products</h3>
-                  <p className="dashboard__value">{productIn+productOut}</p>
+            <div className="col-md-6">
+              <div className="card mb-4">
+                <div className="card-body">
+                  <div className="d-flex align-items-center">
+                    <BsCart className="fs-2 me-3 text-primary" />
+                    <div>
+                      <h5 className="card-title">Product In</h5>
+                      <p className="card-text">{productIn}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

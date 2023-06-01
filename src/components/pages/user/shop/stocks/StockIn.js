@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import {
-  updateDoc,
-  doc,
-} from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, storage } from '../../../../../firebase';
 
 const StockIn = ({ product, id }) => {
+  const collectionRef = collection(
+    db,
+    'todos',
+    'f3adC8WShePwSBwjQ2yj',
+    'basic_users',
+    'm831SaFD4oCioO6nfTc7',
+    'stock_in'
+  );
   const [productTitle, setProductTitle] = useState(product.productTitle);
   const [size, setSize] = useState(product.productSize);
   const [quantity, setQuantity] = useState(product.productQuantity);
@@ -21,7 +26,6 @@ const StockIn = ({ product, id }) => {
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
-
 
   const updateProduct = async (e) => {
     e.preventDefault();
@@ -67,7 +71,7 @@ const StockIn = ({ product, id }) => {
         id
       );
 
-      const productData = {
+      const stockInData = {
         productTitle,
         productSize: parseInt(size),
         productQuantity: parseInt(quantity),
@@ -78,6 +82,22 @@ const StockIn = ({ product, id }) => {
         sizeSystem,
         productDetails: details,
         productPrice: parseInt(price),
+        createdtime: serverTimestamp(),
+        updatedtime: serverTimestamp()
+      };
+
+      const productData = {
+        productTitle,
+        productSize: parseInt(size),
+        productQuantity: parseInt(quantity) + parseInt(product.productQuantity),
+        color,
+        branch,
+        category,
+        productBrand: brand,
+        sizeSystem,
+        productDetails: details,
+        productPrice: parseInt(price),
+        updatedtime: serverTimestamp()
       };
 
       if (downloadURL) {
@@ -85,6 +105,7 @@ const StockIn = ({ product, id }) => {
       }
 
       await updateDoc(productDocumentRef, productData);
+      await addDoc(collectionRef, stockInData);
       window.location.reload();
     } catch (err) {
       console.log(err);
@@ -112,22 +133,23 @@ const StockIn = ({ product, id }) => {
         type="button"
         className="btn btn-outline-success m-1"
         data-bs-toggle="modal"
-        data-bs-target={`#id${id}`}>
+        data-bs-target={`#stockIn${id}`}>
         Stock In
       </button>
 
       <div
         className="modal fade"
-        id={`id${id}`}
+        id={`stockIn${id}`}
         tabIndex="-1"
-        aria-labelledby="editLabel"
-        aria-hidden="true">
+        aria-labelledby="stockInLabel"
+        aria-hidden="true"
+      >
         <div className="modal-dialog modal-dialog-centered modal-lg">
           <form className="modal-content">
             <div className="modal-header">
               <h5
                 className="modal-title"
-                id="editLabel">
+                id="stockIn">
                 Stock In
               </h5>
               <button
@@ -313,14 +335,17 @@ const StockIn = ({ product, id }) => {
                 </div>
                 <div className='col px-md-5 mt-3'>
                   <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Details</label>
-                    <input
+                    <label for="exampleFormControlTextarea1" class="form-label">Details</label>
+                    <textarea
                       type="text"
                       value={details}
                       onChange={(e) => setDetails(e.target.value)}
-                      className="form-control detail-lg p-3"
+                      class="form-control"
                       placeholder="Product details"
-                    />
+                      id="exampleFormControlTextarea1"
+                      rows="3"
+                    >
+                    </textarea>
                   </div>
 
                 </div>
@@ -331,7 +356,9 @@ const StockIn = ({ product, id }) => {
               <button
                 type="button"
                 className="btn btn-outline-danger"
-                data-bs-dismiss="modal">Close
+                data-bs-dismiss="modal"
+              >
+                Close
               </button>
               <button
                 type="button"

@@ -46,11 +46,6 @@ const AddProduct = () => {
 	const submitTodo = async (e) => {
 		e.preventDefault();
 		try {
-			// if (!image) {
-			// 	alert('Please select an image for your product.');
-			// 	return;
-			// }
-
 			setLoading(true);
 
 			const storageRef = ref(storage, `products/productImage/${image.name}`);
@@ -107,18 +102,32 @@ const AddProduct = () => {
 	};
 
 	return (
-		<div className="modal fade" id="addModal" tabIndex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+		<div
+			className="modal fade"
+			id="addModal"
+			tabIndex="-1"
+			aria-labelledby="addModalLabel"
+			aria-hidden="true"
+		>
 			<div className="modal-dialog modal-dialog-centered modal-lg">
-				<form className="modal-content" onSubmit={submitTodo}>
+				<form
+					className="modal-content"
+					onSubmit={submitTodo}
+				>
 					<div className="modal-header">
 						<h5 className="modal-title" id="addModalLabel">
 							Add Product
 						</h5>
-						<button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						<button
+							type="button"
+							className="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close">
+						</button>
 					</div>
 					<div className="modal-body">
 						{/* <div className="row"> */}
-							{/* <div className="col">
+						{/* <div className="col">
                 {image && (
                   <div className="mb-3">
                     <label className="form-label">Current Image:</label>
@@ -198,7 +207,7 @@ const AddProduct = () => {
 											value={size}
 											onChange={(e) => setSize(e.target.value)}
 											className="form-control"
-											placeholder="39.5"	
+											placeholder="39.5"
 										/>
 									</div>
 								</div>
@@ -285,14 +294,17 @@ const AddProduct = () => {
 							</div>
 							<div className='col px-md-5 mt-3'>
 								<div class='mb-3'>
-									<label for="formGroupExampleInput" class="form-label">Details</label>
-									<input
+									<label for="exampleFormControlTextarea1" class="form-label">Details</label>
+									<textarea
 										type="text"
 										value={details}
 										onChange={(e) => setDetails(e.target.value)}
-										className="form-control detail-lg p-3"
+										class="form-control"
 										placeholder="Product details"
-									/>
+										id="exampleFormControlTextarea1"
+										rows="3"
+									>
+									</textarea>
 								</div>
 
 							</div>

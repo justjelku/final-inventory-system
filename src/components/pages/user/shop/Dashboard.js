@@ -8,12 +8,57 @@ import StockIn from './stocks/StockIn';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
-  const [showStockOut, setShowStockOut] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showStockOutMap, setShowStockOutMap] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState('');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [selectedRows, setSelectedRows] = useState([]);
 
-  const toggleStockOut = () => {
-    setShowStockOut(!showStockOut);
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
   };
 
+  const handleSort = (field) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const handleRowSelect = (rowId) => {
+    setSelectedRows((prevSelectedRows) => {
+      if (prevSelectedRows.includes(rowId)) {
+        return prevSelectedRows.filter((id) => id !== rowId);
+      } else {
+        return [...prevSelectedRows, rowId];
+      }
+    });
+  };
+
+  const filteredProducts = products.filter((product) =>
+    product.productTitle.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const sortedProducts = sortField
+    ? [...filteredProducts].sort((a, b) => {
+      const sortResult = a[sortField].localeCompare(b[sortField]);
+      return sortDirection === 'asc' ? sortResult : -sortResult;
+    })
+    : filteredProducts;
+
+  const toggleStockOut = (productId) => {
+    setShowStockOutMap((prevState) => ({
+      ...prevState,
+      [productId]: !prevState[productId],
+    }));
+  };
+
+  const handleShowModal = () => {
+    setShowModal(true);
+  };
 
   const collectionRef = collection(
     db,
@@ -44,33 +89,62 @@ const Dashboard = () => {
     setProducts(updatedProducts);
   };
 
+  const handleShare = () => {
+    const canvas = document.getElementById('myChart');
+    const imageURL = canvas.toDataURL('image/png');
+    // Replace the share implementation with your preferred method (e.g., sharing via social media library)
+    console.log('Sharing the chart:', imageURL);
+  };
+
+  const handleExport = () => {
+    const canvas = document.getElementById('myChart');
+    const imageURL = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = imageURL;
+    link.download = 'chart.png';
+    link.click();
+  };
+
   return (
     <div>
-      <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-start pt-3 pb-2 mb-3 border-bottom m-10">
+      {/* <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-start pt-3 pb-2 mb-3 border-bottom m-10">
         <h1 className="h2">Dashboard</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group me-2">
-            <button type="button" className="btn btn-sm btn-outline-secondary">
+            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleShare}>
               Share
             </button>
-            <button type="button" className="btn btn-sm btn-outline-secondary">
+            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleExport}>
               Export
             </button>
           </div>
           <button type="button" className="btn btn-sm btn-outline-secondary dropdown-toggle">
             <span data-feather="calendar"></span>
-            This week
+            Select date
           </button>
         </div>
-      </div>
+      </div> */}
       <ChartComponent />
       {/* <canvas className="my-4 w-100" id="myChart" width="900" height="380"></canvas> */}
       <div className="table-responsive">
+        <input
+          type="search"
+          className="form-control me-3"
+          aria-label="Search"
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="Search by product title"
+        />
         <table className="table table-striped table-hover">
           <thead className='ms-auto'>
             <tr>
               <th scope="col" className="text-center">Image</th>
-              <th scope="col" className="text-center " style={{ width: '200px' }}>Product Title</th>
+              <th scope="col" className="text-center" style={{ width: '200px' }} onClick={() => handleSort('productTitle')}>
+                Product Title{' '}
+                {sortField === 'productTitle' && (
+                  <i className={`bi bi-chevron-${sortDirection === 'asc' ? 'up' : 'down'}`} />
+                )}
+              </th>
               <th scope="col" className="text-center">Category</th>
               <th scope="col" className="text-center">Color</th>
               <th scope="col" className="text-center">Price</th>
@@ -83,8 +157,8 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
-              <tr key={product.id}>
+            {sortedProducts.map((product) => (
+              <tr key={product.id} className={selectedRows.includes(product.id) ? 'selected' : ''} onClick={() => handleRowSelect(product.id)}>
                 <td>
                   <img src={product.productImage} alt={product.productTitle} style={{ width: '50px', height: '50px' }} />
                 </td>
@@ -115,31 +189,32 @@ const Dashboard = () => {
                       }}
                       id={product.id}
                     />
-                    {showStockOut && (
-                      <StockOut
-                        product={{
-                          productTitle: product.productTitle,
-                          productSize: product.productSize,
-                          productQuantity: product.productQuantity,
-                          color: product.color,
-                          category: product.category,
-                          branch: product.branch,
-                          productBrand: product.productBrand,
-                          sizeSystem: product.sizeSystem,
-                          productDetails: product.productDetails,
-                          productPrice: product.productPrice,
-                          productImage: product.productImage,
-                        }}
-                        id={product.id}
-                      />
+                    <StockOut
+                      product={{
+                        productTitle: product.productTitle,
+                        productSize: product.productSize,
+                        productQuantity: product.productQuantity,
+                        color: product.color,
+                        category: product.category,
+                        branch: product.branch,
+                        productBrand: product.productBrand,
+                        sizeSystem: product.sizeSystem,
+                        productDetails: product.productDetails,
+                        productPrice: product.productPrice,
+                        productImage: product.productImage,
+                      }}
+                      id={product.id}
+                    />
+                    {/* {showStockOutMap[product.id] && (
+                      
                     )}
                     <button
                       type="button"
                       className="btn btn-outline-danger m-1"
-                      onClick={toggleStockOut}
+                      onClick={() => toggleStockOut(product.id)}
                     >
-                      {showStockOut ? 'Hide Stock Out' : 'Show Stock Out'}
-                    </button>
+                      {showStockOutMap[product.id] ? 'Hide Stock Out' : 'Show Stock Out'}
+                    </button> */}
                     {/* <button
                       type="button"
                       className="btn btn-outline-danger ms-2"

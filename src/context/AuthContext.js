@@ -6,6 +6,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { Spinner } from 'react-bootstrap';
+import AnimatedImage from '../components/animation/AnimateImage';
 
 const firebaseConfig = {
 	apiKey: "AIzaSyDoH11PS0y0rAm3koscH3VQNlkmv26bwuY",
@@ -143,9 +144,7 @@ export const AuthProvider = ({ children }) => {
             height: '100vh', // Adjust the height as needed
           }}
         >
-                <Spinner animation="border" role="status">
-        <span className="visually-hidden">Loading...</span>
-      </Spinner>
+          <AnimatedImage/>
 
         </div>
       ) : (
