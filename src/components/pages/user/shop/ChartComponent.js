@@ -10,16 +10,17 @@ const ChartComponent = () => {
   const chartRef = useRef(null);
   const [products, setProducts] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const collectionRef = collection(
-    db,
-    'todos',
-    'f3adC8WShePwSBwjQ2yj',
-    'basic_users',
-    'm831SaFD4oCioO6nfTc7',
-    'products'
-  );
-
   useEffect(() => {
+    const collectionRef = collection(
+      db,
+      'todos',
+      'f3adC8WShePwSBwjQ2yj',
+      'basic_users',
+      'm831SaFD4oCioO6nfTc7',
+      'products'
+    );
+
+    
     const getProduct = async () => {
       try {
         const productSnapshot = await getDocs(collectionRef);

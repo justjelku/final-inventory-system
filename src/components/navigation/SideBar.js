@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BoxArrowRight } from 'react-bootstrap-icons';
-import { HouseFill, PersonFill, ArchiveFill } from 'react-bootstrap-icons';
+import { BoxArrowRight, BuildingFill, CartFill } from 'react-bootstrap-icons';
+import { HouseFill, PersonFill, PeopleFill, TruckFrontFill } from 'react-bootstrap-icons';
 import { useAuth } from '../../context/AuthContext';
 import ProfileIcon from '../pages/user/profile/ProfileIcon';
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const [showPopover, setShowPopover] = useState(true);
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -32,10 +31,50 @@ const Sidebar = () => {
                     exact to="/home"
                     className="nav-link d-flex align-items-center"
                     activeClassName="active"
-                    aria-current="home"
+                    aria-current="page"
                   >
                     <HouseFill size={30} className="me-2" />
                     Home
+                  </NavLink>
+                </li>
+                <li className="nav-item mt-3">
+                  <NavLink
+                    to="/inventory"
+                    className="nav-link d-flex align-items-center"
+                    activeClassName="active"
+                  >
+                    <CartFill size={30} className="me-2" />
+                    Inventory
+                  </NavLink>
+                </li>
+                <li className="nav-item mt-3">
+                  <NavLink
+                    to="/customer"
+                    className="nav-link d-flex align-items-center"
+                    activeClassName="active"
+                  >
+                    <PeopleFill size={30} className="me-2" />
+                    Customer
+                  </NavLink>
+                </li>
+                <li className="nav-item mt-3">
+                  <NavLink
+                    to="/supplier"
+                    className="nav-link d-flex align-items-center"
+                    activeClassName="active"
+                  >
+                    <TruckFrontFill size={30} className="me-2" />
+                    Supplier
+                  </NavLink>
+                </li>
+                <li className="nav-item mt-3">
+                  <NavLink
+                    to="/branch"
+                    className="nav-link d-flex align-items-center"
+                    activeClassName="active"
+                  >
+                    <BuildingFill size={30} className="me-2" />
+                    Branch
                   </NavLink>
                 </li>
                 <li className="nav-item mt-3">
@@ -46,16 +85,6 @@ const Sidebar = () => {
                   >
                     <PersonFill size={30} className="me-2" />
                     Profile
-                  </NavLink>
-                </li>
-                <li className="nav-item mt-3">
-                  <NavLink
-                    to="/inventory"
-                    className="nav-link d-flex align-items-center"
-                    activeClassName="active"
-                  >
-                    <ArchiveFill size={30} className="me-2" />
-                    Inventory
                   </NavLink>
                 </li>
                 <li className="nav-item fixed-bottom">

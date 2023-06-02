@@ -2,18 +2,51 @@ import React, { useState, useEffect } from 'react';
 import ChartComponent from './ChartComponent'
 import { db } from '../../../../firebase';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
-import EditProduct from './EditTodo';
 import StockOut from './stocks/StockOut';
 import StockIn from './stocks/StockIn';
+import { Dropdown } from 'react-bootstrap';
+import ProductHistoryModal from './stocks/StockHistory';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [showStockOutMap, setShowStockOutMap] = useState({});
+  const [setShowModal] = useState(false);
+  const [setShowStockOutMap] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
   const [selectedRows, setSelectedRows] = useState([]);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showStockInModal, setShowStockInModal] = useState(false);
+  const [showStockOutModal, setShowStockOutModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleShowHistoryModal = (product) => {
+    setSelectedProduct(product);
+    setShowHistoryModal(true);
+  };
+
+  const handleCloseHistoryModal = () => {
+    setShowHistoryModal(false);
+  };
+
+  const handleStockInModal = (product) => {
+    setSelectedProduct(product);
+    setShowStockInModal(true);
+  };
+
+  const handleCloseStockInModal = () => {
+    setShowStockInModal(false);
+  };
+
+  const handleStockOutModal = (product) => {
+    setSelectedProduct(product);
+    setShowStockOutModal(true);
+  };
+
+  const handleCloseStockOutModal = () => {
+    setShowStockOutModal(false);
+  };
+
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -49,27 +82,16 @@ const Dashboard = () => {
     })
     : filteredProducts;
 
-  const toggleStockOut = (productId) => {
-    setShowStockOutMap((prevState) => ({
-      ...prevState,
-      [productId]: !prevState[productId],
-    }));
-  };
-
-  const handleShowModal = () => {
-    setShowModal(true);
-  };
-
-  const collectionRef = collection(
-    db,
-    'todos',
-    'f3adC8WShePwSBwjQ2yj',
-    'basic_users',
-    'm831SaFD4oCioO6nfTc7',
-    'products'
-  );
-
   useEffect(() => {
+    const collectionRef = collection(
+      db,
+      'todos',
+      'f3adC8WShePwSBwjQ2yj',
+      'basic_users',
+      'm831SaFD4oCioO6nfTc7',
+      'products'
+    );
+    
     const getProduct = async () => {
       await getDocs(collectionRef)
         .then((product) => {
@@ -173,61 +195,50 @@ const Dashboard = () => {
                 <td className="text-center justify-content-center">{product.barcode}</td>
                 <td>
                   <div className="d-flex justify-content-center">
-                    <StockIn
-                      product={{
-                        productTitle: product.productTitle,
-                        productSize: product.productSize,
-                        productQuantity: product.productQuantity,
-                        color: product.color,
-                        category: product.category,
-                        branch: product.branch,
-                        productBrand: product.productBrand,
-                        sizeSystem: product.sizeSystem,
-                        productDetails: product.productDetails,
-                        productPrice: product.productPrice,
-                        productImage: product.productImage,
-                      }}
-                      id={product.id}
-                    />
-                    <StockOut
-                      product={{
-                        productTitle: product.productTitle,
-                        productSize: product.productSize,
-                        productQuantity: product.productQuantity,
-                        color: product.color,
-                        category: product.category,
-                        branch: product.branch,
-                        productBrand: product.productBrand,
-                        sizeSystem: product.sizeSystem,
-                        productDetails: product.productDetails,
-                        productPrice: product.productPrice,
-                        productImage: product.productImage,
-                      }}
-                      id={product.id}
-                    />
-                    {/* {showStockOutMap[product.id] && (
-                      
-                    )}
-                    <button
-                      type="button"
-                      className="btn btn-outline-danger m-1"
-                      onClick={() => toggleStockOut(product.id)}
-                    >
-                      {showStockOutMap[product.id] ? 'Hide Stock Out' : 'Show Stock Out'}
-                    </button> */}
-                    {/* <button
-                      type="button"
-                      className="btn btn-outline-danger ms-2"
-                      onClick={() => deleteProduct(product.id)}
-                    >
-                      Delete
-                    </button> */}
+                    <Dropdown>
+                      <Dropdown.Toggle variant="outline-primary" id="dropdown-menu">
+                        <i className="bi bi-three-dots"></i>
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        <Dropdown.Item onClick={() => handleShowHistoryModal(product)}>
+                          Stock History
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => handleStockInModal(product)}>
+                          Stock In
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => handleStockOutModal(product)}>
+                          Stock Out
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        {selectedProduct && (
+          <ProductHistoryModal
+            show={showHistoryModal}
+            onClose={handleCloseHistoryModal}
+            product={selectedProduct}
+          />
+        )}
+        {selectedProduct && (
+          <StockIn
+            show={showStockInModal}
+            onClose={handleCloseStockInModal}
+            product={selectedProduct}
+          />
+        )}
+        {selectedProduct && (
+          <StockOut
+            show={showStockOutModal}
+            onClose={handleCloseStockOutModal}
+            product={selectedProduct}
+          />
+        )}
       </div>
     </div>
   );

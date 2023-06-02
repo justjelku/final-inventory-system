@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { FaUser } from 'react-icons/fa';
 import {
-	getDocs,
 	collection,
 	onSnapshot,
 	query,
@@ -17,7 +15,6 @@ const ProfileTabContent = () => {
 	const [userId, setUserId] = useState(null);
 
 	// STATE
-	const [showModal, setShowModal] = useState(false);
 	const [user, setUser] = useState([]);
 	const [photo, setPhoto] = useState(null);
 	const [firstName, setFirstName] = useState('');
@@ -89,13 +86,13 @@ const ProfileTabContent = () => {
 						photo={photo}
 						id={userId}
 						updateProfile={updateProfile}
-						firstName={firstName}
+						firstName={user && user['first name']}
 						setFirstName={setFirstName}
-						lastName={lastName}
+						lastName={user && user['last name']}
 						setLastName={setLastName}
-						username={username}
+						username={user && user['username']}
 						setUsername={setUsername}
-						email={email}
+						email={user && user['email']}
 						setEmail={setEmail}
 						password={password}
 						setPassword={setPassword}

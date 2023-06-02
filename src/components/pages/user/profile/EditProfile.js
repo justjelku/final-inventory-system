@@ -17,6 +17,16 @@ const EditProfile = ({
 	password,
 	setPassword
 }) => {
+
+	const handleUpdateProfile = async () => {
+		try {
+		  await updateProfile(firstName, lastName, username, email, password);
+		  // Success notification or redirection
+		} catch (error) {
+		  // Error handling
+		}
+	  };
+
 	return (
 		<div className='row'>
 					<div className='col-md-3'>
@@ -51,7 +61,7 @@ const EditProfile = ({
 							</label>
 							<input
 								type='text'
-								value={user && user['first name']}
+								value={firstName}
 								onChange={(e) => setFirstName(e.target.value)}
 								className='form-control'
 								placeholder='First Name'
@@ -63,7 +73,7 @@ const EditProfile = ({
 							</label>
 							<input
 								type='text'
-								value={user && user['last name']}
+								value={lastName}
 								onChange={(e) => setLastName(e.target.value)}
 								className='form-control'
 								placeholder='Last Name'
@@ -89,7 +99,7 @@ const EditProfile = ({
 							</label>
 							<input
 								type='text'
-								value={user && user['username']}
+								value={username}
 								onChange={(e) => setUsername(e.target.value)}
 								className='form-control'
 								placeholder='Username'
@@ -101,7 +111,7 @@ const EditProfile = ({
 							</label>
 							<input
 								type='email'
-								value={user && user['email']}
+								value={email}
 								onChange={(e) => setEmail(e.target.value)}
 								className='form-control'
 								placeholder='Email Address'
@@ -134,7 +144,11 @@ const EditProfile = ({
 							/>
 						</div>
 						<div className='mt-5 ms-auto mb-4'>
-							<button type='button' className='btn btn-outline-primary ms-auto' onClick={updateProfile}>
+							<button 
+							type='button' 
+							className='btn btn-outline-primary ms-auto' 
+							onClick={handleUpdateProfile}
+							>
 								Update Profile
 							</button>
 						</div>

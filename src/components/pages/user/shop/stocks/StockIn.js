@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, storage } from '../../../../../firebase';
+import { Modal } from 'react-bootstrap';
 
-const StockIn = ({ product, id }) => {
+const StockIn = ({ show, product, onClose }) => {
   const collectionRef = collection(
     db,
     'todos',
     'f3adC8WShePwSBwjQ2yj',
     'basic_users',
     'm831SaFD4oCioO6nfTc7',
-    'stock_in'
+    'stock'
   );
   const [productTitle, setProductTitle] = useState(product.productTitle);
   const [size, setSize] = useState(product.productSize);
@@ -68,7 +69,7 @@ const StockIn = ({ product, id }) => {
         'basic_users',
         'm831SaFD4oCioO6nfTc7',
         'products',
-        id
+        product.id
       );
 
       const stockInData = {
@@ -80,8 +81,9 @@ const StockIn = ({ product, id }) => {
         category,
         productBrand: brand,
         sizeSystem,
+        stock: 'Stock In',
         productDetails: details,
-        productPrice: parseInt(price),
+        productPrice: price,
         createdtime: serverTimestamp(),
         updatedtime: serverTimestamp()
       };
@@ -96,7 +98,7 @@ const StockIn = ({ product, id }) => {
         productBrand: brand,
         sizeSystem,
         productDetails: details,
-        productPrice: parseInt(price),
+        productPrice: price,
         updatedtime: serverTimestamp()
       };
 
@@ -111,7 +113,6 @@ const StockIn = ({ product, id }) => {
       console.log(err);
     }
   };
-
 
   const handlePriceChange = (e) => {
     setPrice(e.target.value);
@@ -128,248 +129,176 @@ const StockIn = ({ product, id }) => {
 
 
   return (
-    <>
-      <button
-        type="button"
-        className="btn btn-outline-success m-1"
-        data-bs-toggle="modal"
-        data-bs-target={`#stockIn${id}`}>
-        Stock In
-      </button>
-
-      <div
-        className="modal fade"
-        id={`stockIn${id}`}
-        tabIndex="-1"
-        aria-labelledby="stockInLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered modal-lg">
-          <form className="modal-content">
-            <div className="modal-header">
-              <h5
-                className="modal-title"
-                id="stockIn">
-                Stock In
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close">
-              </button>
+    <Modal show={show} onHide={onClose} size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Stock In for {product.productTitle}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="row">
+          <div className="col-md-3">
+            {/* <div className="mb-3">
+              <label htmlFor="formFileSm" className="form-label">
+                Select Image
+              </label>
+              <input
+                className="form-control form-control-sm"
+                id="formFileSm"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                readOnly
+              />
+            </div> */}
+            <div className="col">
+              {image && typeof image === 'string' ? (
+                <div className="d-flex justify-content-center">
+                  {/* Display the Firebase URL */}
+                  <img src={image} style={{ maxWidth: '100%', backgroundColor: 'white' }} alt="Selected Product" className="img-fluid" />
+                </div>
+              ) : (
+                <div className="d-flex justify-content-center">
+                  {/* Display the selected image */}
+                  <img src={URL.createObjectURL(image)} style={{ maxWidth: '100%', backgroundColor: 'white' }} alt="Selected Product" className="img-fluid" />
+                </div>
+              )}
             </div>
-            <div className="modal-body">
 
-              <div className="row">
-                {/* <div className="row">
-                  <div className="col">
-                  {image && (
-                      <div className="mb-3">
-                        <label className="form-label">Current Image:</label>
-                        <img src={image} alt="Current Product" className="img-fluid" />
-                      </div>
-                    )}
-                  </div>
-                </div> */}
-                <div className="col-md-3">
-                  <div className="mb-3">
-                    <label htmlFor="formFileSm" className="form-label">
-                      Select Image
-                    </label>
-                    <input
-                      className="form-control form-control-sm"
-                      id="formFileSm"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
-                  </div>
-                  <div className="col">
-                    {image && typeof image === 'string' ? (
-                      <div className="d-flex justify-content-center">
-                        {/* Display the Firebase URL */}
-                        <img src={image} style={{ maxWidth: '100%', backgroundColor: 'white' }} alt="Selected Product" className="img-fluid" />
-                      </div>
-                    ) : (
-                      <div className="d-flex justify-content-center">
-                        {/* Display the selected image */}
-                        <img src={URL.createObjectURL(image)} style={{ maxWidth: '100%', backgroundColor: 'white' }} alt="Selected Product" className="img-fluid" />
-                      </div>
-                    )}
-                  </div>
-
-                </div>
-                <div className="col-md-3">
-                  <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Product Title</label>
-                    <input
-                      type="text"
-                      value={productTitle}
-                      onChange={(e) => setProductTitle(e.target.value)}
-                      className="form-control"
-                      placeholder="Nike Air Zoom"
-                    />
-                  </div>
-                  {/* <div class='mb-3'>
-									<label for="formGroupExampleInput" class="form-label">Size System</label>
-									<input
-										type="text"
-										value={sizeSystem}
-										onChange={(e) => setSizeSystem(e.target.value)}
-										className="form-control"
-										placeholder="Ex. UK, US, EU"
-									/>
-								</div>
-								<div class='mb-3'>
-									<label for="formGroupExampleInput" class="form-label">Men Size</label>
-									<input
-										type="number"
-										value={size}
-										onChange={(e) => setSize(e.target.value)}
-										className="form-control"
-										placeholder="Ex. 5.1"
-									/>
-								</div> */}
-                  <div className="mb-3">
-                    <label htmlFor="formGroupExampleInput" className="form-label">Size</label>
-                    <div className="input-group mb-3">
-                      <select
-                        className="form-select"
-                        value={sizeSystem}
-                        onChange={(e) => setSizeSystem(e.target.value)}
-                      >
-                        <option value="EU">EU</option>
-                        <option value="US">US</option>
-                        <option value="UK">UK</option>
-                      </select>
-                      <input
-                        type="number"
-                        value={size}
-                        onChange={(e) => setSize(e.target.value)}
-                        className="form-control"
-                        placeholder="39.5"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className='col-md-3'>
-                  <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Quantity</label>
-                    <input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
-                      className="form-control"
-                      placeholder="Ex. 100"
-                    />
-                  </div>
-                  <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Color</label>
-                    <input
-                      type="text"
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      className="form-control"
-                      placeholder="Ex. Black"
-                    />
-                  </div>
-                  <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Branch</label>
-                    <input
-                      type="text"
-                      value={branch}
-                      onChange={(e) => setBranch(e.target.value)}
-                      className="form-control"
-                      placeholder="Ex. CDO Branch"
-                    />
-                  </div>
-
-                </div>
-                <div className='col-md-3'>
-                  <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Brand</label>
-                    <input
-                      type="text"
-                      value={brand}
-                      onChange={(e) => setBrand(e.target.value)}
-                      className="form-control"
-                      placeholder="Nike"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="formGroupExampleInput" className="form-label">Price</label>
-                    <div className="input-group mb-1">
-                      <select
-                        className="form-select"
-                        value={currency}
-                        onChange={handleCurrencyChange}
-                      >
-                        <option value="₱">₱</option>
-                        <option value="$">$</option>
-                        <option value="€">€</option>
-                        {/* Add more currency options here */}
-                      </select>
-                      <input
-                        type="number"
-                        value={price}
-                        onChange={handlePriceChange}
-                        className="form-control"
-                        placeholder="0"
-                        aria-label="Amount (to the nearest currency)"
-                      />
-                    </div>
-                  </div>
-                  <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Category</label>
-                    <input
-                      type="text"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="form-control"
-                      placeholder="Basketball Shoes"
-                    />
-                  </div>
-
-
-                </div>
-                <div className='col px-md-5 mt-3'>
-                  <div class='mb-3'>
-                    <label for="exampleFormControlTextarea1" class="form-label">Details</label>
-                    <textarea
-                      type="text"
-                      value={details}
-                      onChange={(e) => setDetails(e.target.value)}
-                      class="form-control"
-                      placeholder="Product details"
-                      id="exampleFormControlTextarea1"
-                      rows="3"
-                    >
-                    </textarea>
-                  </div>
-
-                </div>
+          </div>
+          <div className="col-md-3">
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Product Title</label>
+              <input
+                type="text"
+                value={productTitle}
+                onChange={(e) => setProductTitle(e.target.value)}
+                className="form-control"
+                placeholder="Nike Air Zoom"
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="formGroupExampleInput" className="form-label">Size</label>
+              <div className="input-group mb-3">
+                <select
+                  className="form-select"
+                  value={sizeSystem}
+                  onChange={(e) => setSizeSystem(e.target.value)}
+                >
+                  <option value="EU">EU</option>
+                  <option value="US">US</option>
+                  <option value="UK">UK</option>
+                </select>
+                <input
+                  type="number"
+                  value={size}
+                  onChange={(e) => setSize(e.target.value)}
+                  className="form-control"
+                  placeholder="39.5"
+                />
               </div>
+            </div>
+          </div>
+          <div className='col-md-3'>
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Quantity</label>
+              <input
+                type="number"
+                // value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                className="form-control"
+                placeholder="0"
+              />
+            </div>
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Color</label>
+              <input
+                type="text"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="form-control"
+                placeholder="Ex. Black"
+              />
+            </div>
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Branch</label>
+              <input
+                type="text"
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                className="form-control"
+                placeholder="Ex. CDO Branch"
+              />
+            </div>
 
+          </div>
+          <div className='col-md-3'>
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Brand</label>
+              <input
+                type="text"
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                className="form-control"
+                placeholder="Nike"
+                readOnly
+              />
             </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-outline-danger"
-                data-bs-dismiss="modal"
+            <div className="mb-3">
+              <label htmlFor="formGroupExampleInput" className="form-label">Price</label>
+              <div className="input-group mb-1">
+                <input
+                  type="text"
+                  value= {price}
+                  onChange={handlePriceChange}
+                  className="form-control"
+                  placeholder="0"
+                  aria-label="Amount (to the nearest currency)"
+                  readOnly
+                />
+              </div>
+            </div>
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Category</label>
+              <input
+                type="text"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="form-control"
+                placeholder="Basketball Shoes"
+                readOnly
+              />
+            </div>
+
+
+          </div>
+          <div className='col px-md-5 mt-3'>
+            <div class='mb-3'>
+              <label for="exampleFormControlTextarea1" class="form-label">Details</label>
+              <textarea
+                type="text"
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+                class="form-control"
+                placeholder="Product details"
+                id="exampleFormControlTextarea1"
+                rows="3"
               >
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline-primary"
-                onClick={e => updateProduct(e)}
-              >Stock In</button>
+              </textarea>
             </div>
-          </form>
+
+          </div>
         </div>
-      </div>
-    </>
+      </Modal.Body>
+      <Modal.Footer>
+        <button className="btn btn-secondary" onClick={onClose}>
+          Close
+        </button>
+        <button
+          type="button"
+          className="btn btn-outline-primary"
+          onClick={e => updateProduct(e)}
+        >Stock In</button>
+      </Modal.Footer>
+    </Modal>
   )
 }
 

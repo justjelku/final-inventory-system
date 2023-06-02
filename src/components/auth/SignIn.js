@@ -6,14 +6,23 @@ import { useAuth } from '../../context/AuthContext';
 
 const SignInPage = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, createUser } = useAuth();
   const [error, setError] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showSignUpModal, setShowSignUpModal] = useState(false);
 
-  const handleSignUp = () => {
-    // Handle sign-up logic
+  const handleSignUp = async (firstName, lastName, username, email, password) => {
+    try {
+      await createUser(firstName, lastName, username, email, password);
+      setShowSignUpModal(false);
+      // Optional: You can automatically sign in the user after successful sign up
+      await signIn(email, password);
+      navigate('/');
+    } catch (error) {
+      setError(error.message);
+      console.log(error.message);
+    }
   };
 
   const handleSignIn = async (e) => {

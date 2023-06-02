@@ -1,7 +1,7 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../../firebase';
 import { storage } from '../../../../firebase';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 
 const AddProduct = () => {

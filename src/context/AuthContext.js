@@ -5,7 +5,6 @@ import { getFirestore } from 'firebase/firestore';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { Spinner } from 'react-bootstrap';
 import AnimatedImage from '../components/animation/AnimateImage';
 
 const firebaseConfig = {
@@ -68,7 +67,11 @@ export const AuthProvider = ({ children }) => {
 	  const authToken = await userCredential.user.getIdToken(); // Get the authentication token
       const uid = userCredential.user.uid;
 
-      await firestore.collection("users").doc(uid).set({
+      await firestore.collection("users")
+			.doc("qIglLalZbFgIOnO0r3Zu")
+			.collection("basic_users")
+			.doc(userCredential.user.uid)
+      .set({
         uid: uid,
         role: 'basic',
         firstName: firstName,
@@ -88,6 +91,42 @@ export const AuthProvider = ({ children }) => {
       return userCredential;
     } catch (error) {
       throw new Error(error.message);
+    }
+  };
+
+  const updateProfile = async (firstName, lastName, username, email, password) => {
+    try {
+      const user = auth.currentUser;
+      const userDocRef = firestore.collection("users")
+      .doc("qIglLalZbFgIOnO0r3Zu")
+			.collection("basic_users")
+			.doc(user.uid);
+
+      // Update the user document with the new profile information
+      await userDocRef.update({
+        firstName: firstName,
+        lastName: lastName,
+        username: username,
+        email: email,
+      });
+
+      // Update the user state with the new profile information
+      setUser((prevUser) => ({
+        ...prevUser,
+        firstName: firstName,
+        lastName: lastName,
+        username: username,
+        email: email,
+      }));
+
+      // Update the user's password if a new password is provided
+      if (password) {
+        await user.updatePassword(password);
+      }
+
+      // Success notification or redirection
+    } catch (error) {
+      // Error handling
     }
   };
 
@@ -134,7 +173,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, signIn, createUser, logout }}>
+    <AuthContext.Provider value={{ user, signIn, createUser, logout, updateProfile }}>
       {loading ? (
         <div
           style={{

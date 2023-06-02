@@ -1,4 +1,4 @@
-import EditTodo from './EditTodo'
+import EditProduct from './EditProduct'
 import AddProduct from './AddProduct'
 import React, { useState, useEffect } from 'react'
 import { db } from '../../../../firebase'
@@ -67,7 +67,7 @@ const Product = () => {
 												</div>
 											</div>
 											<span className="ms-auto">
-												<EditTodo
+												<EditProduct
 													product={{
 														productTitle,
 														productSize,

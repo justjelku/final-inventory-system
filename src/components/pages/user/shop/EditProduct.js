@@ -78,7 +78,7 @@ const EditProduct = ({ product, id }) => {
         productBrand: brand,
         sizeSystem,
         productDetails: details,
-        productPrice: parseInt(price),
+        productPrice: price,
       };
 
       if (downloadURL) {
@@ -276,18 +276,8 @@ const EditProduct = ({ product, id }) => {
                   <div className="mb-3">
                     <label htmlFor="formGroupExampleInput" className="form-label">Price</label>
                     <div className="input-group mb-1">
-                      <select
-                        className="form-select"
-                        value={currency}
-                        onChange={handleCurrencyChange}
-                      >
-                        <option value="₱">₱</option>
-                        <option value="$">$</option>
-                        <option value="€">€</option>
-                        {/* Add more currency options here */}
-                      </select>
                       <input
-                        type="number"
+                        type="text"
                         value={price}
                         onChange={handlePriceChange}
                         className="form-control"

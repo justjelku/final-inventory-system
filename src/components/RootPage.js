@@ -8,6 +8,9 @@ import NavBar from './navigation/NavBar';
 import WelcomePage from './pages/WelcomePage';
 import './../App.css';
 import { AuthProvider } from '../context/AuthContext';
+import Customer from './pages/user/contents/Customer';
+import Supplier from './pages/user/contents/Supplier';
+import Branch from './pages/user/contents/Branch';
 
 const RootPage = () => {
   const [isMobileView, setIsMobileView] = useState(false);
@@ -69,6 +72,9 @@ const RootPage = () => {
               <Route path="/home" component={<HomeTabContent />} element={<HomeTabContent />} />
               <Route path="/profile" component={<ProfileTabContent />} element={<ProfileTabContent />} />
               <Route path="/inventory" component={<ProductTabContent />} element={<ProductTabContent />} />
+              <Route path="/customer" component={<Customer />} element={<Customer />} />
+              <Route path="/supplier" component={<Supplier />} element={<Supplier />} />
+              <Route path="/branch" component={<Branch />} element={<Branch />} />
             </Routes>
           </div>
         </div>
