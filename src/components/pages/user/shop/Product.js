@@ -22,7 +22,7 @@ const Product = () => {
 
 	// Delete todo
 	const deleteProduct = async (id) => {
-		window.confirm("Are you sure you want to delete this Todo?")
+		window.confirm("Are you sure you want to delete this Product?")
 		await deleteDoc(doc(db, 'todos', 'f3adC8WShePwSBwjQ2yj', 'basic_users', 'm831SaFD4oCioO6nfTc7', 'products', id));
 		window.location.reload();
 	};

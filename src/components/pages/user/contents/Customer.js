@@ -1,9 +1,12 @@
 import React from 'react'
+import Customer from '../customer/Customer'
 
-const Customer = () => {
+const CustomerTabContent = () => {
   return (
-	<div>Customer</div>
+	<div>
+		<Customer/>
+	</div>
   )
 }
 
-export default Customer
+export default CustomerTabContent
