@@ -1,38 +1,55 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Chart } from 'chart.js/auto';
 import feather from 'feather-icons';
-import { db } from '../../../../firebase';
-import { collection, getDocs } from 'firebase/firestore';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { db } from '../../../../firebase';
+import {
+	collection,
+	getDocs,
+	doc,
+	deleteDoc,
+	onSnapshot,
+	query,
+} from 'firebase/firestore';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 const ChartComponent = () => {
   const chartRef = useRef(null);
   const [products, setProducts] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+	useEffect(() => {
+		const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+			if (user) {
+				setUserId(user.uid);
+			} else {
+				setUserId(null);
+			}
+		});
+
+		return () => unsubscribeAuth();
+	}, []);
+
   useEffect(() => {
-    const collectionRef = collection(
-      db,
-      'todos',
-      'f3adC8WShePwSBwjQ2yj',
-      'basic_users',
-      'm831SaFD4oCioO6nfTc7',
-      'products'
-    );
+		if (userId) {
+			const unsubscribe = onSnapshot(
+				query(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products')),
+				(querySnapshot) => {
+					let productData = [];
+					querySnapshot.forEach((doc) => {
+						productData.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
+					});
+					setProducts(productData); // Assuming there is only one user document
+				}
+			);
 
-    
-    const getProduct = async () => {
-      try {
-        const productSnapshot = await getDocs(collectionRef);
-        const productData = productSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-        setProducts(productData);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    getProduct();
-  }, []);
+			return () => unsubscribe();
+		}
+	}, [userId]);
 
   useEffect(() => {
     feather.replace({ 'aria-hidden': 'true', 'width': '50', 'height': '50' });

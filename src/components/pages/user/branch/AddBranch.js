@@ -1,9 +1,11 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../../firebase';
 import { storage } from '../../../../firebase';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 const AddBranch = () => {
   const [branchId, setBranchId] = useState('');
@@ -11,6 +13,19 @@ const AddBranch = () => {
   const [branchAddress, setBranchAddress] = useState('');
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
   const submitBranch = async (e) => {
     e.preventDefault();
@@ -21,12 +36,13 @@ const AddBranch = () => {
 
       const collectionRef = collection(
         db,
-        'todos',
-        'f3adC8WShePwSBwjQ2yj',
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
         'basic_users',
-        'm831SaFD4oCioO6nfTc7',
-        'branch',
+        userId,
+        'branch'
       );
+
 
       await addDoc(collectionRef, {
         branchId: branchId,

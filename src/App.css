@@ -59,3 +59,33 @@ body{
 	margin-right: 10px;
 	margin-left: 10px; /* Add some spacing if needed */
   }
+
+  .navbar {
+	background-color: #333; /* Set desired background color */
+  }
+  
+  .navbar.scrolled {
+	background-color: #f8f9fa; /* Set desired background color when scrolled */
+  }
+  
+  .nav-link {
+	color: #333; /* Set desired text color */
+  }
+  
+  .nav-link:hover {
+	color: #000; /* Set desired hover text color */
+  }
+  
+
+  .sidebar {
+	background-color: #ffffff; /* Set desired background color */
+  }
+  
+  .sidebar .nav-link {
+	color: #000000; /* Set desired text color */
+  }
+  
+  .sidebar .nav-link:hover {
+	background-color: #555; /* Set desired hover background color */
+  }
+  

@@ -4,12 +4,21 @@ import React, { useState, useEffect } from 'react';
 import {
   updateDoc,
   doc,
+  collection,
+  serverTimestamp,
 } from 'firebase/firestore';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 
 const EditProduct = ({ product, id }) => {
   const [productTitle, setProductTitle] = useState(product.productTitle);
+  const [productId, setProductId] = useState(product.productId);
   const [size, setSize] = useState(product.productSize);
+  const [barcodeId, setBarcodeId] = useState(product.barcodeId);
+  const [barcodeUrl, setBarcodeUrl] = useState(product.barcodeUrl);
+  const [qrcodeUrl, setQrcodeUrl] = useState(product.qrcodeUrl);
   const [quantity, setQuantity] = useState(product.productQuantity);
   const [color, setColor] = useState(product.color);
   const [branch, setBranch] = useState(product.branch);
@@ -22,6 +31,20 @@ const EditProduct = ({ product, id }) => {
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
 
 
   const updateProduct = async (e) => {
@@ -58,17 +81,21 @@ const EditProduct = ({ product, id }) => {
 
   const updateProductData = async (downloadURL) => {
     try {
-      const productDocumentRef = doc(
+      const collectionRef = collection(
         db,
-        'todos',
-        'f3adC8WShePwSBwjQ2yj',
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
         'basic_users',
-        'm831SaFD4oCioO6nfTc7',
+        userId,
         'products',
-        id
       );
+      const docRef = doc(collectionRef, productId);
 
       const productData = {
+        productId,
+				barcodeId,
+				barcodeUrl,
+				qrcodeUrl,
         productTitle,
         productSize: parseInt(size),
         productQuantity: parseInt(quantity),
@@ -79,13 +106,14 @@ const EditProduct = ({ product, id }) => {
         sizeSystem,
         productDetails: details,
         productPrice: price,
+        updatedtime: serverTimestamp(),
       };
 
       if (downloadURL) {
         productData.productImage = downloadURL;
       }
 
-      await updateDoc(productDocumentRef, productData);
+      await updateDoc(docRef, productData);
       window.location.reload();
     } catch (err) {
       console.log(err);
@@ -331,10 +359,13 @@ const EditProduct = ({ product, id }) => {
                 data-bs-dismiss="modal">Close
               </button>
               <button
-                type="button"
-                className="btn btn-outline-primary"
-                onClick={e => updateProduct(e)}
-              >Update Product</button>
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={updateProduct}
+              disabled={loading}
+            >
+              {loading ? 'Updating...' : 'Update'}
+            </button>
             </div>
           </form>
         </div>

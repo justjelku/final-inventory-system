@@ -14,6 +14,7 @@ import Branch from './pages/user/contents/Branch';
 import CustomerTabContent from './pages/user/contents/Customer';
 import SupplierTabContent from './pages/user/contents/Supplier';
 import BranchTabContent from './pages/user/contents/Branch';
+import Sidebarss from './navigation/sidebars';
 
 const RootPage = () => {
   const [isMobileView, setIsMobileView] = useState(false);
@@ -57,14 +58,14 @@ const RootPage = () => {
 
   return (
     <div className='container'>
-      <NavBar />
+      {/* <NavBar /> */}
       <div className="container-fluid">
         <div className="row">
           <div className="col-md-3">
             <div>
             {!isMobileView && (
               <div className="col-md-3 fixed-top">
-                <Sidebar />
+                <Sidebarss />
               </div>
             )}
             </div>

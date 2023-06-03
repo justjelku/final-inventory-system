@@ -3,28 +3,63 @@ import { db } from '../../firebase';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { FaUser } from 'react-icons/fa';
-import {
-  getDocs,
-  collection,
-  onSnapshot,
-  query,
-  where
-} from 'firebase/firestore';
+import { collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
 import { BsGraphUp, BsClock, BsClipboardData, BsCart } from 'react-icons/bs';
 
 const WelcomePage = () => {
-  const [totalQuantities, setTotalQuantities] = useState(null);
-  const [stockIn, setStockIn] = useState(null);
-  const [productOut, setProductOut] = useState(null);
-  const [productIn, setProductIn] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [userId, setUserId] = useState(null);
+  const [totalQuantities, setTotalQuantities] = useState(0);
+const [stockIn, setStockIn] = useState(0);
+const [productOut, setProductOut] = useState([]);
+const [totalStockOutQuantity, setTotalStockOutQuantity] = useState(0); // Declare the state variable
+const [totalStockInQuantity, setTotalStockInQuantity] = useState(0); 
+const [productIn, setProductIn] = useState([]);
+const [products, setProducts] = useState([]);
+const [userId, setUserId] = useState(null);
+
 
   // STATE
   const [showModal, setShowModal] = useState(false)
   const [user, setUser] = useState(null);
   const [photo, setPhoto] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState('');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleSort = (field) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const handleRowSelect = (rowId) => {
+    setSelectedRows((prevSelectedRows) => {
+      if (prevSelectedRows.includes(rowId)) {
+        return prevSelectedRows.filter((id) => id !== rowId);
+      } else {
+        return [...prevSelectedRows, rowId];
+      }
+    });
+  };
+
+  const filteredProducts = products.filter((product) =>
+    product.productTitle.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const sortedProducts = sortField
+    ? [...filteredProducts].sort((a, b) => {
+      const sortResult = a[sortField].localeCompare(b[sortField]);
+      return sortDirection === 'asc' ? sortResult : -sortResult;
+    })
+    : filteredProducts;
 
   useEffect(() => {
     const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
@@ -84,7 +119,7 @@ const WelcomePage = () => {
           'qIglLalZbFgIOnO0r3Zu',
           'basic_users',
           userId,
-          'products'
+          'stock'
         )
       );
       const unsubscribe = onSnapshot(getProduct, (querySnapshot) => {
@@ -97,6 +132,75 @@ const WelcomePage = () => {
       return () => unsubscribe();
     }
   }, [setProducts, userId]);
+
+  useEffect(() => {
+    if (userId) {
+      const getProduct = query(
+        collection(
+          db,
+          'users',
+          'qIglLalZbFgIOnO0r3Zu',
+          'basic_users',
+          userId,
+          'stock'
+        )
+      );
+      const unsubscribe = onSnapshot(getProduct, (querySnapshot) => {
+        let productsArr = [];
+        let totalQuantity = 0;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.stock === 'Stock Out') {
+            const stockOutQuantity = data.productQuantity || 0;
+            totalQuantity += stockOutQuantity;
+          }
+          productsArr.push({ id: doc.id, productTitle: doc.productTitle, ...data });
+        });
+
+        setProductOut(productsArr);
+        setTotalStockOutQuantity(totalQuantity); // Update the total stock out quantity
+      });
+
+      return () => unsubscribe();
+    }
+  }, [setProductOut, setTotalStockOutQuantity, userId]);
+
+  useEffect(() => {
+    if (userId) {
+      const getProduct = query(
+        collection(
+          db,
+          'users',
+          'qIglLalZbFgIOnO0r3Zu',
+          'basic_users',
+          userId,
+          'stock'
+        )
+      );
+      const unsubscribe = onSnapshot(getProduct, (querySnapshot) => {
+        let productsArr = [];
+        let totalQuantity = 0;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.stock === 'Stock In') {
+            const stockOutQuantity = data.productQuantity || 0;
+            totalQuantity += stockOutQuantity;
+          }
+          productsArr.push({ id: doc.id, productTitle: doc.productTitle, ...data });
+        });
+
+        setProductIn(productsArr);
+        setTotalStockInQuantity(totalQuantity); // Update the total stock out quantity
+      });
+
+      return () => unsubscribe();
+    }
+  }, [setProductIn, setTotalStockInQuantity, userId]);
+  
+  
+  
 
   useEffect(() => {
     const getTotalQuantities = async () => {
@@ -119,49 +223,76 @@ const WelcomePage = () => {
 
   useEffect(() => {
     const getTotalStockIn = async () => {
-      const querySnapshot = await getDocs(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'stock_in'));
-      let total = 0;
-      let zeroQtyCount = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.productQuantity) {
-          total += parseInt(data.productQuantity);
-        } else {
-          zeroQtyCount++;
-        }
-      });
-      console.log(`Total quantities: ${total}`);
-      console.log(`Total products with quantity of zero: ${zeroQtyCount}`);
-      setStockIn(total);
+      if (selectedProduct && selectedProduct.productId) {
+        const querySnapshot = await getDocs(
+          collection(
+            db,
+            'users',
+            'qIglLalZbFgIOnO0r3Zu',
+            'basic_users',
+            userId,
+            'products',
+            selectedProduct.productId,
+            'stock_in'
+          )
+        );
+        let total = 0;
+        let zeroQtyCount = 0;
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.productQuantity) {
+            total += parseInt(data.productQuantity);
+          } else {
+            zeroQtyCount++;
+          }
+        });
+        console.log(`Total quantities: ${total}`);
+        console.log(`Total products with quantity of zero: ${zeroQtyCount}`);
+        setStockIn(total);
+      }
     };
-    
+  
     if (userId) {
       getTotalStockIn();
     }
-  }, [userId]);
+  }, [userId, selectedProduct]);
+  
 
-  useEffect(() => {
-    const getTotalProductOut = async () => {
-      const querySnapshot = await getDocs(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'stock_out'));
-      let total = 0;
-      let zeroQtyCount = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.productQuantity) {
-          total += parseInt(data.productQuantity);
-        } else {
-          zeroQtyCount++;
-        }
-      });
-      console.log(`Total quantities: ${total}`);
-      console.log(`Total products with quantity of zero: ${zeroQtyCount}`);
-      setProductOut(total);
-    };
-    
-    if (userId) {
-      getTotalProductOut();
-    }
-  }, [userId]);
+  // useEffect(() => {
+  //   const getTotalProductOut = async () => {
+  //     if (selectedProduct && selectedProduct.productId) {
+  //       const querySnapshot = await getDocs(
+  //         collection(
+  //           db,
+  //           'users',
+  //           'qIglLalZbFgIOnO0r3Zu',
+  //           'basic_users',
+  //           userId,
+  //           'products',
+  //           selectedProduct.productId,
+  //           'stock_out'
+  //         )
+  //       );
+  //       let total = 0;
+  //       let zeroQtyCount = 0;
+  //       querySnapshot.forEach((doc) => {
+  //         const data = doc.data();
+  //         if (data.productQuantity) {
+  //           total += parseInt(data.productQuantity);
+  //         } else {
+  //           zeroQtyCount++;
+  //         }
+  //       });
+  //       console.log(`Total quantities: ${total}`);
+  //       console.log(`Total products with quantity of zero: ${zeroQtyCount}`);
+  //       setProductOut(total);
+  //     }
+  //   };
+  
+  //   if (userId) {
+  //     getTotalProductOut();
+  //   }
+  // }, [userId, selectedProduct]);
 
   useEffect(() => {
     const getTotalProductIn = async () => {
@@ -187,6 +318,7 @@ const WelcomePage = () => {
   
   
   return (
+    <>
     <div className="container mt-4">
       <div className="row">
         <div className="col-lg-8">
@@ -198,7 +330,7 @@ const WelcomePage = () => {
                     <BsGraphUp className="fs-5 me-3 text-primary" />
                     <div>
                       <h5 className="card-title">Total Quantities</h5>
-                      <p className="card-text">{totalQuantities}</p>
+                      <p className="card-text">{totalStockInQuantity+totalStockOutQuantity+productIn}</p>
                     </div>
                   </div>
                 </div>
@@ -211,7 +343,7 @@ const WelcomePage = () => {
                     <BsClock className="fs-2 me-3 text-primary" />
                     <div>
                       <h5 className="card-title">Stock In</h5>
-                      <p className="card-text">{stockIn}</p>
+                      <p className="card-text">{totalStockInQuantity}</p>
                     </div>
                   </div>
                 </div>
@@ -223,8 +355,8 @@ const WelcomePage = () => {
                   <div className="d-flex align-items-center">
                     <BsClipboardData className="fs-2 me-3 text-primary" />
                     <div>
-                      <h5 className="card-title">Product Out</h5>
-                      <p className="card-text">{productOut}</p>
+                      <h5 className="card-title">Stock Out</h5>
+                      <p className="card-text">{totalStockOutQuantity}</p>
                     </div>
                   </div>
                 </div>
@@ -247,6 +379,51 @@ const WelcomePage = () => {
         </div>
       </div>
     </div>
+    <h2>Recent Activities</h2>
+    <div className="table-responsive">
+        <input
+          type="search"
+          className="form-control me-3"
+          aria-label="Search"
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="Search by product title"
+        />
+        <table className="table table-striped table-hover">
+          <thead className='ms-auto'>
+            <tr>
+              <th scope="col" className="text-center" style={{ width: '200px' }} onClick={() => handleSort('productTitle')}>
+                Product Title{' '}
+                {sortField === 'productTitle' && (
+                  <i className={`bi bi-chevron-${sortDirection === 'asc' ? 'up' : 'down'}`} />
+                )}
+              </th>
+              <th scope="col" className="text-center">Category</th>
+              <th scope="col" className="text-center">Color</th>
+              <th scope="col" className="text-center">Quantity</th>
+              <th scope="col" className="text-center">Size</th>
+              <th scope="col" className="text-center">Brand</th>
+              <th scope="col" className="text-center">Branch</th>
+              <th scope="col" className="text-center">Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedProducts.map((product) => (
+              <tr key={product.id} className={selectedRows.includes(product.id) ? 'selected' : ''} onClick={() => handleRowSelect(product.id)}>
+                <td className="text-center justify-content-center">{product.productTitle}</td>
+                <td className="text-center justify-content-center">{product.category}</td>
+                <td className="text-center justify-content-center">{product.color}</td>
+                <td className="text-center justify-content-center">{product.productQuantity} Pairs</td>
+                <td className="text-center justify-content-center">{product.sizeSystem} {product.productSize}</td>
+                <td className="text-center justify-content-center">{product.productBrand}</td>
+                <td className="text-center justify-content-center">{product.branch}</td>
+                <td className="text-center justify-content-center">{product.stock}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 };
 

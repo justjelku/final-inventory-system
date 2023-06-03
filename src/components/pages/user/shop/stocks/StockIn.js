@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
-import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { collection, addDoc, getDocs, serverTimestamp, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, storage } from '../../../../../firebase';
 import { Modal } from 'react-bootstrap';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 const StockIn = ({ show, product, onClose }) => {
-  const collectionRef = collection(
-    db,
-    'todos',
-    'f3adC8WShePwSBwjQ2yj',
-    'basic_users',
-    'm831SaFD4oCioO6nfTc7',
-    'stock'
-  );
+  const [productId, setProductId] = useState(product.productId);
+  const [barcodeId, setBarcodeId] = useState(product.barcodeId);
+  const [barcodeUrl, setBarcodeUrl] = useState(product.barcodeUrl);
+  const [qrcodeUrl, setQrcodeUrl] = useState(product.qrcodeUrl);
   const [productTitle, setProductTitle] = useState(product.productTitle);
   const [size, setSize] = useState(product.productSize);
   const [quantity, setQuantity] = useState(product.productQuantity);
@@ -27,6 +26,43 @@ const StockIn = ({ show, product, onClose }) => {
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
+  const [supplier, setSupplier] = useState([])
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
+
+  useEffect(() => {
+    const suppliersRef = collection(
+      db, 
+      'users', 
+      'qIglLalZbFgIOnO0r3Zu', 
+      'basic_users', 
+      userId, 
+      'suppliers'
+      );    
+
+    const getSupplier = async () => {
+      await getDocs(suppliersRef).then((supplier) => {
+        let supplierData = supplier.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+        setSupplier(supplierData)
+      }).catch((err) => {
+        console.log(err);
+      })
+    }
+    getSupplier()
+  }, [])
 
   const updateProduct = async (e) => {
     e.preventDefault();
@@ -60,19 +96,46 @@ const StockIn = ({ show, product, onClose }) => {
     }
   };
 
+  const getLastProductId = () => {
+		const random = Math.floor(Math.random() * 100000);
+		const user = firebase.auth().currentUser;
+		const userId = user.uid;
+		const userPrefix = userId.substring(0, 3);
+		return `${userPrefix}${String(random).padStart(5, '0')}`;
+	  };
+
   const updateProductData = async (downloadURL) => {
     try {
-      const productDocumentRef = doc(
-        db,
-        'todos',
-        'f3adC8WShePwSBwjQ2yj',
-        'basic_users',
-        'm831SaFD4oCioO6nfTc7',
-        'products',
-        product.id
-      );
+      const lastProductId = getLastProductId();
+      const stockinId = `2023${userId.substring(0, 6)}${lastProductId.substring(lastProductId.length - 8)}`;
 
+      const collectionRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
+        userId,
+        'products'
+      );
+      const stockRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
+        userId,
+        'stock'
+      );
+      const productRef = doc(collectionRef, productId);
+      const docRef = doc(productRef, 'stock_in', stockinId);
+      const stocksRef = doc(productRef, 'stock_history', stockinId);
+      const stockhistoryRef = doc(stockRef, stockinId);
       const stockInData = {
+        stockinId, stockinId, 
+        userId: userId,
+				productId,
+				barcodeId,
+				barcodeUrl,
+				qrcodeUrl,
         productTitle,
         productSize: parseInt(size),
         productQuantity: parseInt(quantity),
@@ -84,11 +147,17 @@ const StockIn = ({ show, product, onClose }) => {
         stock: 'Stock In',
         productDetails: details,
         productPrice: price,
+        supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         createdtime: serverTimestamp(),
         updatedtime: serverTimestamp()
       };
 
       const productData = {
+        userId,
+				productId,
+				barcodeId,
+				barcodeUrl,
+				qrcodeUrl,
         productTitle,
         productSize: parseInt(size),
         productQuantity: parseInt(quantity) + parseInt(product.productQuantity),
@@ -106,8 +175,16 @@ const StockIn = ({ show, product, onClose }) => {
         productData.productImage = downloadURL;
       }
 
-      await updateDoc(productDocumentRef, productData);
-      await addDoc(collectionRef, stockInData);
+      if (!selectedSupplier || !selectedSupplier.supplierName) {
+        alert('Please select a supplier');
+        return;
+      }
+      
+
+      await updateDoc(productRef, productData);
+      await setDoc(docRef, stockInData);
+      await setDoc(stocksRef, stockInData);
+      await setDoc(stockhistoryRef, stockInData);
       window.location.reload();
     } catch (err) {
       console.log(err);
@@ -196,6 +273,28 @@ const StockIn = ({ show, product, onClose }) => {
                 />
               </div>
             </div>
+            <div className="mb-3">
+              <label htmlFor="supplier" className="form-label">Supplier</label>
+              <select
+                id="supplier"
+                className="form-select"
+                value={selectedSupplier ? selectedSupplier.id : ''}
+                onChange={(e) => {
+                  const supplierId = e.target.value;
+                  const supplierObj = supplier.find((supplierItem) => supplierItem.id === supplierId);
+                  setSelectedSupplier(supplierObj);
+                }}
+              >
+                <option value="">Select Supplier</option>
+                {supplier.map((supplierItem) => (
+                  <option key={supplierItem.id} value={supplierItem.id}>
+                    {supplierItem.supplierName}
+                  </option>
+                ))}
+              </select>
+
+            </div>
+
           </div>
           <div className='col-md-3'>
             <div class='mb-3'>
@@ -247,7 +346,7 @@ const StockIn = ({ show, product, onClose }) => {
               <div className="input-group mb-1">
                 <input
                   type="text"
-                  value= {price}
+                  value={price}
                   onChange={handlePriceChange}
                   className="form-control"
                   placeholder="0"
@@ -293,10 +392,13 @@ const StockIn = ({ show, product, onClose }) => {
           Close
         </button>
         <button
-          type="button"
-          className="btn btn-outline-primary"
-          onClick={e => updateProduct(e)}
-        >Stock In</button>
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={updateProduct}
+              disabled={loading}
+            >
+              {loading ? 'Updating...' : 'Stock In'}
+            </button>
       </Modal.Footer>
     </Modal>
   )

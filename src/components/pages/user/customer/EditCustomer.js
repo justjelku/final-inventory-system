@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { collection, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import { Modal } from 'react-bootstrap';
 import { db } from '../../../../firebase';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 const EditCustomer = ({ show, customers, onClose }) => {
   const [customerName, setCustomerName] = useState(customers.customerName);
@@ -9,6 +12,19 @@ const EditCustomer = ({ show, customers, onClose }) => {
   const [contactNumber, setContactNumber] = useState(customers.contactNumber);
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
   const updateCustomer = async (e) => {
     e.preventDefault();
@@ -17,15 +33,16 @@ const EditCustomer = ({ show, customers, onClose }) => {
 
       const collectionRef = collection(
         db,
-        'todos',
-        'f3adC8WShePwSBwjQ2yj',
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
         'basic_users',
-        'm831SaFD4oCioO6nfTc7',
-        'customer',
+        userId,
+        'customer'
       );
 
 	  const customerId = customers.id;
 	  const customerData = {
+      customerId: customerId,
         customerName: customerName,
         customerAddress: customerAddress,
         contactNumber: contactNumber,

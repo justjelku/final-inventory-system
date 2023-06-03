@@ -1,18 +1,13 @@
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../../../firebase';
 import { storage } from '../../../../firebase';
-import React, { useState } from 'react';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
+import React, { useState, useEffect } from 'react';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 
 const AddProduct = () => {
-	const collectionRef = collection(
-		db,
-		'todos',
-		'f3adC8WShePwSBwjQ2yj',
-		'basic_users',
-		'm831SaFD4oCioO6nfTc7',
-		'products'
-	);
 	const [productTitle, setProductTitle] = useState('');
 	const [size, setSize] = useState('');
 	const [quantity, setQuantity] = useState('');
@@ -27,6 +22,19 @@ const AddProduct = () => {
 	const [progresspercent, setProgresspercent] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [currency, setCurrency] = useState('₱');
+	const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
 	const handlePriceChange = (e) => {
 		setPrice(e.target.value);
@@ -41,12 +49,23 @@ const AddProduct = () => {
 		setImage(file);
 	};
 
+	const getLastProductId = () => {
+		const random = Math.floor(Math.random() * 100000);
+		const user = firebase.auth().currentUser;
+		const userId = user.uid;
+		const userPrefix = userId.substring(0, 3);
+		return `${userPrefix}${String(random).padStart(5, '0')}`;
+	  };
+
 	const combinedValue = `${currency} ${price}`;
 
-	const submitTodo = async (e) => {
+	const submitProduct = async (e) => {
 		e.preventDefault();
 		try {
 			setLoading(true);
+			const lastProductId = getLastProductId();
+			const barcodeData = `2023${userId.substring(0, 4)}${lastProductId.substring(lastProductId.length - 3)}`;
+			const productId = `2023${userId.substring(0, 5)}${lastProductId.substring(lastProductId.length - 8)}`;
 
 			const storageRef = ref(storage, `products/productImage/${image.name}`);
 			const uploadTask = uploadBytesResumable(storageRef, image);
@@ -64,8 +83,22 @@ const AddProduct = () => {
 					alert(error);
 				},
 				async () => {
+					const collectionRef = collection(
+						db,
+						'users',
+						'qIglLalZbFgIOnO0r3Zu',
+						'basic_users',
+						userId,
+						'products',
+					);
+					const docRef = doc(collectionRef, productId);
 					const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-					await addDoc(collectionRef, {
+					await setDoc(docRef, {
+						userId: userId,
+						productId: productId,
+						barcodeId: barcodeData,
+						barcodeUrl: '',
+						qrcodeUrl: '',
 						productTitle: productTitle,
 						productPrice: combinedValue,
 						color: color,
@@ -112,7 +145,6 @@ const AddProduct = () => {
 			<div className="modal-dialog modal-dialog-centered modal-lg">
 				<form
 					className="modal-content"
-					onSubmit={submitTodo}
 				>
 					<div className="modal-header">
 						<h5 className="modal-title" id="addModalLabel">
@@ -314,7 +346,14 @@ const AddProduct = () => {
 						<button className="btn btn-secondary" data-bs-dismiss="modal">
 							Close
 						</button>
-						{!loading && <button className="btn btn-primary">Create Product</button>}
+						<button
+							type="button"
+							className="btn btn-outline-primary"
+							onClick={submitProduct}
+							disabled={loading}
+						>
+							{loading ? 'Adding...' : 'Add Product'}
+						</button>
 					</div>
 				</form>
 			</div>

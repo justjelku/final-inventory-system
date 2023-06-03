@@ -4,29 +4,66 @@ import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore'
 import AddBranch from './AddBranch'
 import { Dropdown } from 'react-bootstrap';
 import EditBranch from './EditBranch';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
+
 
 const Branch = () => {
 	const [branch, setBranch] = useState([])
   const [showEditBranchModal, setShowEditBranchModal] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState(null);
-	const collectionRef = collection(db, 'todos', 'f3adC8WShePwSBwjQ2yj', 'basic_users', 'm831SaFD4oCioO6nfTc7', 'branch');
+	const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
 	useEffect(() => {
-		const getBranch = async () => {
-			await getDocs(collectionRef).then((branch) => {
-				let branchData = branch.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-				setBranch(branchData)
-			}).catch((err) => {
-				console.log(err);
-			})
-		}
-		getBranch()
-	}, [])
+    const getBranch = async () => {
+      const branchRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
+        userId,
+        'branch'
+      );
+
+      try {
+        const querySnapshot = await getDocs(branchRef);
+        const branchData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        setBranch(branchData);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (userId) {
+      getBranch();
+    }
+  }, [userId]);
 
 	// Delete todo
 	const deleteBranch = async (id) => {
 		window.confirm("Are you sure you want to delete this Branch?")
-		await deleteDoc(doc(db, 'todos', 'f3adC8WShePwSBwjQ2yj', 'basic_users', 'm831SaFD4oCioO6nfTc7', 'branch', id));
+		await deleteDoc(doc(
+      db,
+      'users',
+      'qIglLalZbFgIOnO0r3Zu',
+      'basic_users',
+      userId,
+      'branch',
+      id
+    ));
 		window.location.reload();
 	};
 
@@ -41,6 +78,7 @@ const Branch = () => {
 
   return (
 	<>
+  <h2 className='mt-3'>Manage Branch</h2>
 	<div>
 		<button
 									data-bs-toggle="modal"

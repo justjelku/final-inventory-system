@@ -104,10 +104,10 @@ const SignUpPage = ({ show, onClose, onSignUp }) => {
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" className="btn btn-outline-secondary" onClick={handleClose}>
+        <Button variant="secondary" className="btn btn-secondary" onClick={handleClose}>
           Close
         </Button>
-        <Button variant="primary" className="btn btn-outline-primary" onClick={handleSignUp}>
+        <Button variant="primary" className="btn btn-primary" onClick={handleSignUp}>
           Sign Up
         </Button>
       </Modal.Footer>

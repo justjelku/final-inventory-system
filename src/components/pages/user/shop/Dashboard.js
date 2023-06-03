@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import ChartComponent from './ChartComponent'
 import { db } from '../../../../firebase';
-import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, query, onSnapshot } from 'firebase/firestore';
 import StockOut from './stocks/StockOut';
 import StockIn from './stocks/StockIn';
 import { Dropdown } from 'react-bootstrap';
 import ProductHistoryModal from './stocks/StockHistory';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -19,6 +22,19 @@ const Dashboard = () => {
   const [showStockInModal, setShowStockInModal] = useState(false);
   const [showStockOutModal, setShowStockOutModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
   const handleShowHistoryModal = (product) => {
     setSelectedProduct(product);
@@ -81,29 +97,23 @@ const Dashboard = () => {
       return sortDirection === 'asc' ? sortResult : -sortResult;
     })
     : filteredProducts;
-
-  useEffect(() => {
-    const collectionRef = collection(
-      db,
-      'todos',
-      'f3adC8WShePwSBwjQ2yj',
-      'basic_users',
-      'm831SaFD4oCioO6nfTc7',
-      'products'
-    );
     
-    const getProduct = async () => {
-      await getDocs(collectionRef)
-        .then((product) => {
-          let productData = product.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-          setProducts(productData);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    };
-    getProduct();
-  }, []);
+    useEffect(() => {
+      if (userId) {
+        const unsubscribe = onSnapshot(
+          query(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products')),
+          (querySnapshot) => {
+            let productData = [];
+            querySnapshot.forEach((doc) => {
+              productData.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
+            });
+            setProducts(productData); // Assuming there is only one user document
+          }
+        );
+  
+        return () => unsubscribe();
+      }
+    }, [userId]);
 
   const deleteProduct = async (id) => {
     await deleteDoc(doc(db, 'todos', 'f3adC8WShePwSBwjQ2yj', 'basic_users', 'm831SaFD4oCioO6nfTc7', 'products', id));

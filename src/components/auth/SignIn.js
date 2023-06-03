@@ -97,7 +97,7 @@ const SignInPage = () => {
                 </Form.Group>
 
                 <div className="d-grid">
-                  <Button className="btn btn-outline-primary" variant="primary" type="submit">
+                  <Button className="btn btn-primary" variant="primary" type="submit">
                     Sign In
                   </Button>
                 </div>

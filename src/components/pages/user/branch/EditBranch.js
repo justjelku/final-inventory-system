@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { collection, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import { Modal } from 'react-bootstrap';
 import { db } from '../../../../firebase';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 const EditBranch = ({ show, branchList, onClose }) => {
 	const [branchName, setBranchName] = useState(branchList.branchName);
 	const [branchAddress, setBranchAddress] = useState(branchList.branchAddress);
 	const [progresspercent, setProgresspercent] = useState(0);
 	const [loading, setLoading] = useState(false);
+	const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
 	const updateBranch = async (e) => {
 		e.preventDefault();
@@ -16,15 +32,16 @@ const EditBranch = ({ show, branchList, onClose }) => {
 
 			const collectionRef = collection(
 				db,
-				'todos',
-				'f3adC8WShePwSBwjQ2yj',
+				'users',
+				'qIglLalZbFgIOnO0r3Zu',
 				'basic_users',
-				'm831SaFD4oCioO6nfTc7',
-				'branch',
-			);
+				userId,
+				'branch'
+			  );
 
 			const branchId = branchList.id;
 			const branchData = {
+				branchId: branchId,
 				branchName: branchName,
 				branchAddress: branchAddress,
 				updatedtime: serverTimestamp()
