@@ -9,7 +9,7 @@ import 'firebase/compat/firestore';
 const ProductHistoryModal = ({ show, onClose, product }) => {
   const [productHistory, setProductHistory] = useState([]);
   const [productId, setProductId] = useState(product.productId);
-  const [stockinId, setStockinId] = useState(product.stockinId);
+  // const [stockinId, setStockinId] = useState(product.stockinId);
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
@@ -27,7 +27,17 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
   useEffect(() => {
 		if (userId) {
 			const unsubscribe = onSnapshot(
-				query(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products', productId, 'stock_history')),
+				query(collection(
+          db, 
+          'users', 
+          'qIglLalZbFgIOnO0r3Zu', 
+          'basic_users',
+          userId, 
+          'products', 
+          productId, 
+          'stock_history',
+          )
+        ),
 				(querySnapshot) => {
 					let productData = [];
 					querySnapshot.forEach((doc) => {
@@ -46,12 +56,14 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
     const fetchProductHistory = async () => {
       try {
         const collectionRef = collection(
-          db,
-          'todos',
-          'f3adC8WShePwSBwjQ2yj',
+          db, 
+          'users', 
+          'qIglLalZbFgIOnO0r3Zu', 
           'basic_users',
-          'm831SaFD4oCioO6nfTc7',
-          'stock'
+          userId, 
+          'products', 
+          productId, 
+          'stock_history',
         );
 
         const querySnapshot = await getDocs(collectionRef);

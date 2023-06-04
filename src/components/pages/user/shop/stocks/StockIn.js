@@ -44,25 +44,29 @@ const StockIn = ({ show, product, onClose }) => {
 
 
   useEffect(() => {
-    const suppliersRef = collection(
-      db, 
-      'users', 
-      'qIglLalZbFgIOnO0r3Zu', 
-      'basic_users', 
-      userId, 
-      'suppliers'
-      );    
-
     const getSupplier = async () => {
-      await getDocs(suppliersRef).then((supplier) => {
-        let supplierData = supplier.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-        setSupplier(supplierData)
-      }).catch((err) => {
+      const suppliersRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
+        userId,
+        'suppliers'
+      );
+
+      try {
+        const querySnapshot = await getDocs(suppliersRef);
+        const supplierData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        setSupplier(supplierData);
+      } catch (err) {
         console.log(err);
-      })
+      }
+    };
+
+    if (userId) {
+      getSupplier();
     }
-    getSupplier()
-  }, [])
+  }, [userId]);
 
   const updateProduct = async (e) => {
     e.preventDefault();

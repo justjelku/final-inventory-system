@@ -116,7 +116,7 @@ const Dashboard = () => {
     }, [userId]);
 
   const deleteProduct = async (id) => {
-    await deleteDoc(doc(db, 'todos', 'f3adC8WShePwSBwjQ2yj', 'basic_users', 'm831SaFD4oCioO6nfTc7', 'products', id));
+    await deleteDoc(doc(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products', id));
     const updatedProducts = products.filter((product) => product.id !== id);
     setProducts(updatedProducts);
   };
