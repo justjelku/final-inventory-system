@@ -6,6 +6,7 @@ import { Modal, Button, Form, Popover } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
 import Sidebar from './SideBar';
 import { List } from 'react-bootstrap-icons';
+import Sidebarss from './sidebars';
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -85,7 +86,7 @@ const NavBar = () => {
         style={{ width: '200px' }}
       >
         <div class="offcanvas-header">
-          <img
+          {/* <img
             src="https://firebasestorage.googleapis.com/v0/b/my-anonymity-app.appspot.com/o/logo.png?alt=media&token=c2df7400-c4e2-4238-a1dd-6d75f1de6c10&_gl=1*tc2wwn*_ga*MTQwMzcxNzM1My4xNjgzNzMxOTI3*_ga_CW55HF8NVT*MTY4NTQ2NDk1My4xNy4xLjE2ODU0NjQ5ODguMC4wLjA."
             alt="Logo"
             className="img-fluid rounded mx-auto d-block mt-3"
@@ -96,27 +97,27 @@ const NavBar = () => {
               justifyContent: 'center',
               display: 'flex'
             }}
-          />
-          <button
+          /> */}
+          {/* <button
             type="button"
             class="btn-close text-reset"
             data-bs-dismiss="offcanvas"
             aria-label="Close">
-          </button>
+          </button> */}
         </div>
         <div class="offcanvas-body">
-          <Sidebar />
+          <Sidebarss />
         </div>
       </div>
       <NavLink
         to="/"
         className="me-auto mt-2"
       >
-        Shoe Inventory Management System
+        
       </NavLink>
-      <form className="d-flex m-1 justify-content-center align-items-center">
-        <input className="form-control me-3" type="search" placeholder="Search" aria-label="Search" />
-        <button className="btn btn-outline-success" type="submit">Search</button>
+      <form className="d-flex me-auto justify-content-end align-items-end">
+        {/* <input className="form-control me-3" type="search" placeholder="Search" aria-label="Search" />
+        <button className="btn btn-outline-success" type="submit">Search</button> */}
       </form>
       {/* <button
         className="nav-link me-3 m-1"

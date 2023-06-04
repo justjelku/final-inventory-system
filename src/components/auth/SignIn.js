@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useNavigate, NavLink, Link } from 'react-router-dom';
 import SignUpPage from './SignUp';
 import { useAuth } from '../../context/AuthContext';
+import { signInWithPopup,  GoogleAuthProvider} from 'firebase/auth';
+import {
+  query,
+  getDocs,
+  collection,
+  where,
+} from "firebase/firestore";
+import { db } from '../../firebase';
 
 const SignInPage = () => {
   const navigate = useNavigate();
-  const { signIn, createUser } = useAuth();
+  const { signIn, createUser, signInWithGoogle } = useAuth();
   const [error, setError] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,8 +24,8 @@ const SignInPage = () => {
     try {
       await createUser(firstName, lastName, username, email, password);
       setShowSignUpModal(false);
-      // Optional: You can automatically sign in the user after successful sign up
-      await signIn(email, password);
+      // // Optional: You can automatically sign in the user after successful sign up
+      // await signIn(email, password);
       navigate('/');
     } catch (error) {
       setError(error.message);
@@ -50,6 +58,41 @@ const SignInPage = () => {
       }
     }
   };
+
+  // const signinWithGoogle = async (e) => {
+  //   e.preventDefault();
+    
+  //   try {
+  //     const res = await signInWithGoogle(email, password);
+  //     const user = res.user;
+  
+  //     // Check if the user exists in the Firestore collection
+  //     const q = query(
+  //       collection(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users"),
+  //       where("uid", "==", user.uid)
+  //     );
+  //     const docs = await getDocs(q);
+  
+  //     if (docs.empty) {
+  //       // User does not exist in the Firestore collection
+  //       alert("User not found");
+  //       return;
+  //     }
+  
+  //     // User exists, proceed with login
+  //     navigate('/');
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert(error.message);
+  //   }
+  // };
+
+  const signinWithGoogle = async (e) => {
+    e.preventDefault();
+    await signInWithGoogle(email, password);
+      navigate('/');
+  };
+  
   
 
   return (
@@ -100,6 +143,12 @@ const SignInPage = () => {
                   <Button className="btn btn-primary" variant="primary" type="submit">
                     Sign In
                   </Button>
+                  <Button className="btn btn-info mt-3" variant="primary" type="submit" onClick={signinWithGoogle}>
+                    Login with Google
+                  </Button>
+                  <div>
+          <Link to="/reset">Forgot Password</Link>
+        </div>
                 </div>
               </form>
               <p className="text-center mt-3">

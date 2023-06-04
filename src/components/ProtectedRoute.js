@@ -13,12 +13,12 @@ const ProtectedRoute = ({ children }) => {
   if (user === loading) {
     // Authentication state is still loading, render a loading indicator or a different component
     return <div style={{
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		height: '100vh', // Adjust the height as needed
-	  }}
-	>Loading...</div>;
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh', // Adjust the height as needed
+    }}
+    >Loading...</div>;
   }
 
   if (!user) {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaUser } from 'react-icons/fa';
 
 const EditProfile = ({
@@ -17,10 +17,12 @@ const EditProfile = ({
 	password,
 	setPassword
 }) => {
+	const [loading, setLoading] = useState(false);
 
 	const handleUpdateProfile = async () => {
 		try {
 		  await updateProfile(firstName, lastName, username, email, password);
+		  window.location.reload();
 		  // Success notification or redirection
 		} catch (error) {
 		  // Error handling
@@ -144,12 +146,13 @@ const EditProfile = ({
 							/>
 						</div>
 						<div className='mt-5 ms-auto mb-4'>
-							<button 
-							type='button' 
-							className='btn btn-outline-primary ms-auto' 
-							onClick={handleUpdateProfile}
-							>
-								Update Profile
+						<button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={handleUpdateProfile}
+              disabled={loading}
+            >
+              {loading ? 'Updating...' : 'Update Profile'}
 							</button>
 						</div>
 					</div>

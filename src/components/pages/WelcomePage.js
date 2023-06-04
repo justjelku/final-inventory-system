@@ -319,9 +319,12 @@ const [userId, setUserId] = useState(null);
   
   return (
     <>
-    <div className="container mt-4">
+    <h2 className='mt-3'>
+      Home
+    </h2>
+    <div className="container mt-auto m-auto justify-content-center">
       <div className="row">
-        <div className="col-lg-8">
+        <div className="col-lg-15">
           <div className="row">
             <div className="col-md-6">
               <div className="card mb-4">

@@ -167,7 +167,7 @@ const Dashboard = () => {
           onChange={handleSearch}
           placeholder="Search by product title"
         />
-        <table className="table table-striped table-hover">
+        <table className="table table-striped table-hover table">
           <thead className='ms-auto'>
             <tr>
               <th scope="col" className="text-center">Image</th>

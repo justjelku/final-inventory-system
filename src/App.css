@@ -73,19 +73,31 @@ body{
   }
   
   .nav-link:hover {
-	color: #000; /* Set desired hover text color */
+	color: #ffffff; /* Set desired hover text color */
   }
   
 
-  .sidebar {
-	background-color: #ffffff; /* Set desired background color */
+  @media (max-width: 767px) {
+    .sidebar-minimized {
+      width: 80px;
+    }
+    
+    .sidebar-minimized .sidebar-content {
+      display: none;
+    }
+    
+    .sidebar-minimized .sidebar-footer {
+      justify-content: flex-start;
+    }
+    
+    .sidebar-minimized .sidebar-footer .container-fluid {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .sidebar-minimized .sidebar-footer .container-fluid .dropdown {
+      margin-top: 10px;
+    }
   }
   
-  .sidebar .nav-link {
-	color: #000000; /* Set desired text color */
-  }
-  
-  .sidebar .nav-link:hover {
-	background-color: #555; /* Set desired hover background color */
-  }
   
