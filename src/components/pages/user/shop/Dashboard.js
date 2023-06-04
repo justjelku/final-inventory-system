@@ -12,8 +12,6 @@ import 'firebase/compat/firestore';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
-  const [setShowModal] = useState(false);
-  const [setShowStockOutMap] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');

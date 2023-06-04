@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, getDocs, serverTimestamp, doc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, serverTimestamp, doc, setDoc, updateDoc, onSnapshot, query } from 'firebase/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, storage } from '../../../../../firebase';
 import { Modal } from 'react-bootstrap';
@@ -16,7 +16,6 @@ const StockIn = ({ show, product, onClose }) => {
   const [size, setSize] = useState(product.productSize);
   const [quantity, setQuantity] = useState(product.productQuantity);
   const [color, setColor] = useState(product.color);
-  const [branch, setBranch] = useState(product.branch);
   const [category, setCategory] = useState(product.category);
   const [brand, setBrand] = useState(product.productBrand);
   const [sizeSystem, setSizeSystem] = useState(product.sizeSystem);
@@ -26,8 +25,10 @@ const StockIn = ({ show, product, onClose }) => {
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
+  const [branch, setBranch] = useState([])
   const [supplier, setSupplier] = useState([])
   const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [selectedBranch, setSelectedBranch] = useState(null);
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
@@ -41,6 +42,32 @@ const StockIn = ({ show, product, onClose }) => {
 
     return () => unsubscribeAuth();
   }, []);
+
+  useEffect(() => {
+    const getBranch = async () => {
+      const branchRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
+        userId,
+        'branch'
+      );
+
+      try {
+        const querySnapshot = await getDocs(branchRef);
+        const branchData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        setBranch(branchData);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (userId) {
+      getBranch();
+    }
+  }, [userId]);
+  
 
 
   useEffect(() => {
@@ -144,7 +171,7 @@ const StockIn = ({ show, product, onClose }) => {
         productSize: parseInt(size),
         productQuantity: parseInt(quantity),
         color,
-        branch,
+        branch: selectedBranch ? selectedBranch.branchName : '',
         category,
         productBrand: brand,
         sizeSystem,
@@ -166,7 +193,7 @@ const StockIn = ({ show, product, onClose }) => {
         productSize: parseInt(size),
         productQuantity: parseInt(quantity) + parseInt(product.productQuantity),
         color,
-        branch,
+        branch: selectedBranch ? selectedBranch.branchName : '',
         category,
         productBrand: brand,
         sizeSystem,
@@ -322,14 +349,28 @@ const StockIn = ({ show, product, onClose }) => {
               />
             </div>
             <div class='mb-3'>
-              <label for="formGroupExampleInput" class="form-label">Branch</label>
-              <input
-                type="text"
-                value={branch}
-                onChange={(e) => setBranch(e.target.value)}
-                className="form-control"
-                placeholder="Ex. CDO Branch"
-              />
+            <label htmlFor="branch" className="form-label">Branch</label>
+              {branch.length > 0 ? (
+                <select
+                  id="branch"
+                  className="form-select"
+                  value={selectedBranch ? selectedBranch.id : ''}
+                  onChange={(e) => {
+                    const branchId = e.target.value;
+                    const branchObj = branch.find((branchItem) => branchItem.id === branchId);
+                    setSelectedBranch(branchObj);
+                  }}
+                >
+                  <option value="">Select Branch</option>
+                  {branch.map((branchItem) => (
+                    <option key={branchItem.id} value={branchItem.id}>
+                      {branchItem.branchName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p>Loading branches...</p>
+              )}
             </div>
 
           </div>
