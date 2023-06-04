@@ -152,32 +152,36 @@ export const AuthProvider = ({ children }) => {
   
 
   const googleProvider = new GoogleAuthProvider();
-  const signInWithGoogle = async () => {
-    try {
-      const res = await signInWithPopup(auth, googleProvider);
-      const user = res.user;
-  
-      // Check if the user already exists in the Firestore collection
-      const q = query(
-        collection(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users"),
-        where("uid", "==", user.uid)
-      );
-      const docs = await getDocs(q);
-      if (docs.empty) {
-        // User does not exist, add the user to the Firestore collection
-        await addDoc(collection(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users"), {
-          userId: user.uid,
-          username: user.displayName,
-          authProvider: "google",
-          email: user.email,
-          role: 'basic'
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      alert(error.message);
+const signInWithGoogle = async () => {
+  try {
+    const res = await signInWithPopup(auth, googleProvider);
+    const user = res.user;
+
+    // Check if the user already exists in the Firestore collection
+    const q = query(
+      collection(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users"),
+      where("uid", "==", user.uid)
+    );
+    const docs = await getDocs(q);
+    if (docs.length === 0) {
+      // User does not exist, add/update the user's document in the Firestore collection
+      await setDoc(doc(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users", user.uid), {
+        userId: user.uid,
+        username: user.displayName,
+        authProvider: "google",
+        email: user.email,
+        role: 'basic',
+        'first name': '',
+        'last name': '',
+        signedInAt: serverTimestamp()
+      });
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
+};
+
 
   const logout = async () => {
     try {
