@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Modal } from 'react-bootstrap';
 import { collection, getDocs, onSnapshot, query } from 'firebase/firestore';
 import { db } from '../../../../../firebase';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import html2pdf from 'html2pdf.js';
 
 const ProductHistoryModal = ({ show, onClose, product }) => {
   const [productHistory, setProductHistory] = useState([]);
   const [productId, setProductId] = useState(product.productId);
-  // const [stockinId, setStockinId] = useState(product.stockinId);
+  const [productTitle, setProductTitlte] = useState(product.productTitle);
+  const [quantity, setQuantity] = useState(product.productQuantity);
+  const [branch, setBranch] = useState(product.branch);
   const [userId, setUserId] = useState(null);
+  const modalRef = useRef(null);
 
   useEffect(() => {
     const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
@@ -25,45 +29,45 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
   }, []);
 
   useEffect(() => {
-		if (userId) {
-			const unsubscribe = onSnapshot(
-				query(collection(
-          db, 
-          'users', 
-          'qIglLalZbFgIOnO0r3Zu', 
-          'basic_users',
-          userId, 
-          'products', 
-          productId, 
-          'stock_history',
+    if (userId) {
+      const unsubscribe = onSnapshot(
+        query(
+          collection(
+            db,
+            'users',
+            'qIglLalZbFgIOnO0r3Zu',
+            'basic_users',
+            userId,
+            'products',
+            productId,
+            'stock_history'
           )
         ),
-				(querySnapshot) => {
-					let productData = [];
-					querySnapshot.forEach((doc) => {
-						productData.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
-					});
-					setProductHistory(productData); // Assuming there is only one user document
-				}
-			);
+        (querySnapshot) => {
+          let productData = [];
+          querySnapshot.forEach((doc) => {
+            productData.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
+          });
+          setProductHistory(productData); // Assuming there is only one user document
+        }
+      );
 
-			return () => unsubscribe();
-		}
-	}, [userId]);
-
+      return () => unsubscribe();
+    }
+  }, [userId]);
 
   useEffect(() => {
     const fetchProductHistory = async () => {
       try {
         const collectionRef = collection(
-          db, 
-          'users', 
-          'qIglLalZbFgIOnO0r3Zu', 
+          db,
+          'users',
+          'qIglLalZbFgIOnO0r3Zu',
           'basic_users',
-          userId, 
-          'products', 
-          productId, 
-          'stock_history',
+          userId,
+          'products',
+          productId,
+          'stock_history'
         );
 
         const querySnapshot = await getDocs(collectionRef);
@@ -77,21 +81,98 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
     fetchProductHistory();
   }, []);
 
+  const getTotalQuantity = () => {
+    let totalQuantity = 0;
+    productHistory.forEach((historyItem) => {
+      totalQuantity += historyItem.productQuantity;
+    });
+    return totalQuantity;
+  };
+
+  const getTotalStockOut = () => {
+    let totalQuantity = 0;
+    productHistory.forEach((historyItem) => {
+      if (historyItem.stock === 'Stock Out') {
+        totalQuantity += historyItem.productQuantity;
+      }
+    });
+    return totalQuantity;
+  };
+  
+
+  const getTotalStockIn = () => {
+    let totalQuantity = 0;
+    productHistory.forEach((historyItem) => {
+      if (historyItem.stock === 'Stock In') {
+        totalQuantity += historyItem.productQuantity;
+      }
+    });
+    return totalQuantity;
+  };
+  
+
+const handleExport = () => {
+  const modalContent = document.getElementById('modalContent');
+  html2pdf().from(modalContent).save('modal.pdf');
+};
+
+  const handlePrintAsPdf = () => {
+    if (modalRef.current) {
+      const printWindow = window.open('', '_blank');
+      const modalContent = document.getElementById('modalContent');
+      // const modalContent = modalRef.current.innerHTML;
+      const htmlContent = `
+        <html>
+          <head>
+            <title>Product History</title>
+            <style>
+              /* Add custom styles for the PDF print */
+              /* Example styles: */
+              h6 { font-weight: bold; }
+              .row { margin-bottom: 10px; }
+            </style>
+          </head>
+          <body>
+            ${modalContent}
+          </body>
+        </html>
+      `;
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
   return (
-    <Modal show={show} onHide={onClose} size="lg">
+    <Modal show={show} onHide={onClose} size="lg" ref={modalRef}>
       <Modal.Header closeButton>
         <Modal.Title>Stock History for {product.productTitle}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body id="modalContent">
+        <div>
+          <strong>Product Name:</strong> {productTitle}
+        </div>
+        <div>
+          <strong>Product ID:</strong> {productId}
+        </div>
+        <p>
+          <strong>Current Quantity:</strong> {quantity} pairs
+        </p>
+
+        <div></div>
         <div className="row">
           <div className="col">
             <h6>Date</h6>
           </div>
           <div className="col">
+            <h6>Supplier</h6>
+          </div>
+          <div className="col">
             <h6>Quantity</h6>
           </div>
           <div className="col">
-            <h6>Supplier</h6>
+            <h6>Branch</h6>
           </div>
           <div className="col">
             <h6>Type</h6>
@@ -100,15 +181,47 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
         {productHistory.map((historyItem) => (
           <div className="row" key={historyItem.id}>
             <div className="col">{historyItem.createdtime?.toDate().toLocaleDateString()}</div>
-            <div className="col">{historyItem.productQuantity}</div>
             <div className="col">{historyItem.supplier}</div>
+            <div className="col">{historyItem.productQuantity} pairs</div>
+            <div className="col">{historyItem.branch}</div>
             <div className="col">{historyItem.stock}</div>
           </div>
         ))}
+        <p></p>
+        <div className="row">
+          <div className="col">
+            <h6>Stock In</h6>
+          </div>
+          <div className="col"></div>
+          <div className="col">{getTotalStockIn()} pairs</div>
+          <div className="col"></div>
+          <div className="col"></div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <h6>Stock Out</h6>
+          </div>
+          <div className="col"></div>
+          <div className="col">{getTotalStockOut()} pairs</div>
+          <div className="col"></div>
+          <div className="col"></div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <h6>Total Stock</h6>
+          </div>
+          <div className="col"></div>
+          <div className="col">{getTotalQuantity()} pairs</div>
+          <div className="col"></div>
+          <div className="col"></div>
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <button className="btn btn-secondary" onClick={onClose}>
           Close
+        </button>
+        <button className="btn btn-primary" onClick={handleExport}>
+          Print as PDF
         </button>
       </Modal.Footer>
     </Modal>

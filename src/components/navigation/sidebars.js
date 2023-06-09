@@ -97,9 +97,9 @@ import {
 			  <NavLink exact to="/inventory" activeClassName="activeClicked">
 				<CDBSidebarMenuItem icon="shopping-cart">Products</CDBSidebarMenuItem>
 			  </NavLink>
-			  <NavLink exact to="/customer" activeClassName="activeClicked">
+			  {/* <NavLink exact to="/customer" activeClassName="activeClicked">
 				<CDBSidebarMenuItem icon="user">Customer</CDBSidebarMenuItem>
-			  </NavLink>
+			  </NavLink> */}
 			  <NavLink exact to="/supplier" activeClassName="activeClicked">
 				<CDBSidebarMenuItem icon="truck">Supplier</CDBSidebarMenuItem>
 			  </NavLink>

@@ -156,6 +156,15 @@ const StockIn = ({ show, product, onClose }) => {
         userId,
         'stock'
       );
+
+      if (parseInt(quantity) > 200){
+        alert('Critical alert: Quantity is at the maximum level!');
+        return;
+      }
+      if (parseInt(quantity) < 50){
+        alert('Critical alert: Quantity is at the minimum level!');
+        return;
+      }
       const productRef = doc(collectionRef, productId);
       const docRef = doc(productRef, 'stock_in', stockinId);
       const stocksRef = doc(productRef, 'stock_history', stockinId);
@@ -306,7 +315,8 @@ const StockIn = ({ show, product, onClose }) => {
             </div>
             <div className="mb-3">
               <label htmlFor="supplier" className="form-label">Supplier</label>
-              <select
+              {supplier.length > 0 ? (
+                <select
                 id="supplier"
                 className="form-select"
                 value={selectedSupplier ? selectedSupplier.id : ''}
@@ -323,7 +333,9 @@ const StockIn = ({ show, product, onClose }) => {
                   </option>
                 ))}
               </select>
-
+              ) : (
+                <p>Loading suppliers...</p>
+              )}
             </div>
 
           </div>

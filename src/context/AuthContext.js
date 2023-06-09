@@ -13,7 +13,7 @@ import {
   updateDoc
 } from "firebase/firestore";
 import { updatePassword } from "firebase/auth";
-import { auth, db } from '../firebase';
+import { db } from '../firebase';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
@@ -40,9 +40,11 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const auth = getAuth();
 
   const signIn = async (email, password) => {
     try {
+      const auth = getAuth()
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const authToken = await userCredential.user.getIdToken(); // Get the authentication token
       const userDoc = await firebase.firestore()
@@ -54,8 +56,8 @@ export const AuthProvider = ({ children }) => {
 
       if (userDoc.exists) {
         setUser({
-          uid: user.uid,
-          email: user.email,
+          uid: userCredential.user.uid,
+          email: userCredential.user.email,
           role: 'basic'
         });
         return null;
@@ -108,6 +110,7 @@ export const AuthProvider = ({ children }) => {
 
   const sendPasswordReset = async (email) => {
     try {
+      const auth = getAuth()
       await sendPasswordResetEmail(auth, email);
       alert("Password reset link sent!");
     } catch (err) {
@@ -118,8 +121,8 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (firstName, lastName, username, email, password) => {
     try {
+      const auth = getAuth()
       const user = auth.currentUser;
-  
       // Update the user document in the Firestore collection
       await updateDoc(doc(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users", user.uid), {
         'first name': firstName,

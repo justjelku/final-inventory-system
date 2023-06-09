@@ -26,7 +26,7 @@ const SignInPage = () => {
       setShowSignUpModal(false);
       // // Optional: You can automatically sign in the user after successful sign up
       // await signIn(email, password);
-      navigate('/');
+      // navigate('/');
     } catch (error) {
       setError(error.message);
       console.log(error.message);
