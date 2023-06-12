@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
 import { BsGraphUp, BsClock, BsClipboardData, BsCart } from 'react-icons/bs';
+import { db } from '../../../firebase';
 
 const WelcomePage = () => {
   const [totalQuantities, setTotalQuantities] = useState(0);
@@ -198,9 +198,6 @@ const [userId, setUserId] = useState(null);
       return () => unsubscribe();
     }
   }, [setProductIn, setTotalStockInQuantity, userId]);
-  
-  
-  
 
   useEffect(() => {
     const getTotalQuantities = async () => {
@@ -256,43 +253,6 @@ const [userId, setUserId] = useState(null);
       getTotalStockIn();
     }
   }, [userId, selectedProduct]);
-  
-
-  // useEffect(() => {
-  //   const getTotalProductOut = async () => {
-  //     if (selectedProduct && selectedProduct.productId) {
-  //       const querySnapshot = await getDocs(
-  //         collection(
-  //           db,
-  //           'users',
-  //           'qIglLalZbFgIOnO0r3Zu',
-  //           'basic_users',
-  //           userId,
-  //           'products',
-  //           selectedProduct.productId,
-  //           'stock_out'
-  //         )
-  //       );
-  //       let total = 0;
-  //       let zeroQtyCount = 0;
-  //       querySnapshot.forEach((doc) => {
-  //         const data = doc.data();
-  //         if (data.productQuantity) {
-  //           total += parseInt(data.productQuantity);
-  //         } else {
-  //           zeroQtyCount++;
-  //         }
-  //       });
-  //       console.log(`Total quantities: ${total}`);
-  //       console.log(`Total products with quantity of zero: ${zeroQtyCount}`);
-  //       setProductOut(total);
-  //     }
-  //   };
-  
-  //   if (userId) {
-  //     getTotalProductOut();
-  //   }
-  // }, [userId, selectedProduct]);
 
   useEffect(() => {
     const getTotalProductIn = async () => {
@@ -315,12 +275,35 @@ const [userId, setUserId] = useState(null);
       getTotalProductIn();
     }
   }, [userId]);
+
+  useEffect(() => {
+		if (userId) {
+			const unsubscribe = onSnapshot(
+				query(
+					collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users'),
+					where('userId', '==', userId)
+				),
+				(querySnapshot) => {
+					let userArr = [];
+					querySnapshot.forEach((doc) => {
+						userArr.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
+					});
+					setUser(userArr[0]); // Assuming there is only one user document
+				}
+			);
+
+			return () => unsubscribe();
+		}
+	}, [userId]);
   
   
   return (
     <>
     <h2 className='mt-3'>
-      Home
+      Hi, {user && (
+        user['first name']
+      )}
+      (admin user)
     </h2>
     <div className="container mt-auto m-auto justify-content-center">
       <div className="row">

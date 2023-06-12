@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import HomeTabContent from './pages/user/contents/Home';
-import ProfileTabContent from './pages/user/contents/Profile';
-import ProductTabContent from './pages/user/contents/Products';
-import Sidebar from './navigation/SideBar';
-import NavBar from './navigation/NavBar';
-import WelcomePage from './pages/WelcomePage';
-import './../App.css';
-import { AuthProvider } from '../context/AuthContext';
-import Customer from './pages/user/contents/Customer';
-import Supplier from './pages/user/contents/Supplier';
-import Branch from './pages/user/contents/Branch';
-import CustomerTabContent from './pages/user/contents/Customer';
-import SupplierTabContent from './pages/user/contents/Supplier';
-import BranchTabContent from './pages/user/contents/Branch';
-import Sidebarss from './navigation/sidebars';
+import HomeTabContent from './contents/Home';
+import ProfileTabContent from './contents/Profile';
+import ProductTabContent from './contents/Products';
+import CustomerTabContent from './contents/Customer';
+import SupplierTabContent from './contents/Supplier';
+import BranchTabContent from './contents/Branch';
+import Sidebarss from '../../navigation/sidebars';
+import WelcomePage from './WelcomePage';
 
 const RootPage = () => {
   const [isMobileView, setIsMobileView] = useState(false);

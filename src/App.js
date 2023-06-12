@@ -1,10 +1,11 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import SignInPage from './components/auth/SignIn';
-import RootPage from './components/RootPage';
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
 import SignUpPage from './components/auth/SignUp';
+import ProtectedRoute from './components/pages/user/ProtectedRoute';
+import RootPage from './components/pages/user/RootPage';
+import AdminRootPage from './components/pages/admin/AdminRootPage';
 
 export function App() {
   return (
@@ -17,8 +18,17 @@ export function App() {
           exact
           path="/*" 
           element={
-           <ProtectedRoute>
+          <ProtectedRoute>
             <RootPage />
+           </ProtectedRoute>
+        } 
+          />
+          <Route 
+          exact
+          path="/admin" 
+          element={
+          <ProtectedRoute>
+            <AdminRootPage />
            </ProtectedRoute>
         } 
           />

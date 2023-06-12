@@ -147,6 +147,7 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
     }
   };
   
+
   return (
     <Modal show={show} onHide={onClose} size="lg" ref={modalRef}>
       <Modal.Header closeButton>

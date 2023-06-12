@@ -45,8 +45,25 @@ const SignInPage = () => {
     setError('');
   
     try {
-      await signIn(email, password);
-      navigate('/');
+      const user = await signIn(email, password);
+      const userDocRef = await db
+        .collection('users')
+        .doc('qIglLalZbFgIOnO0r3Zu')
+        .collection('basic_users')
+        .doc(user.uid)
+        .get();
+  
+      if (userDocRef.exists) {
+        // Check user role and navigate accordingly
+        const userRole = userDocRef.data().role;
+        if (userRole === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
+      } else {
+        setError('User not found. Please check your email or sign up.');
+      }
     } catch (error) {
       if (error.code === 'auth/user-not-found') {
         setError('User not found. Please check your email or sign up.');
@@ -58,34 +75,7 @@ const SignInPage = () => {
       }
     }
   };
-
-  // const signinWithGoogle = async (e) => {
-  //   e.preventDefault();
-    
-  //   try {
-  //     const res = await signInWithGoogle(email, password);
-  //     const user = res.user;
   
-  //     // Check if the user exists in the Firestore collection
-  //     const q = query(
-  //       collection(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users"),
-  //       where("uid", "==", user.uid)
-  //     );
-  //     const docs = await getDocs(q);
-  
-  //     if (docs.empty) {
-  //       // User does not exist in the Firestore collection
-  //       alert("User not found");
-  //       return;
-  //     }
-  
-  //     // User exists, proceed with login
-  //     navigate('/');
-  //   } catch (error) {
-  //     console.error(error);
-  //     alert(error.message);
-  //   }
-  // };
 
   const signinWithGoogle = async (e) => {
     e.preventDefault();

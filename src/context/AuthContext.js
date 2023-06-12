@@ -44,38 +44,32 @@ export const AuthProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
-      const auth = getAuth()
+      const auth = getAuth();
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const authToken = await userCredential.user.getIdToken(); // Get the authentication token
-      const userDoc = await firebase.firestore()
-        .collection("users")
-        .doc("qIglLalZbFgIOnO0r3Zu")
-        .collection("basic_users")
+      const userDoc = await db
+        .collection('users')
+        .doc('qIglLalZbFgIOnO0r3Zu')
+        .collection('basic_users')
         .doc(userCredential.user.uid)
         .get();
-
+  
       if (userDoc.exists) {
         setUser({
-          uid: userCredential.user.uid,
-          email: userCredential.user.email,
-          role: 'basic'
+          signedInAt: serverTimestamp()
         });
-        return null;
+        return userCredential.user; // Return the user object
       }
+  
       // Check if the user exists in the sub-collection
-      if (!userDoc.exists) {
-        console.log("User does not exist in the sub-collection");
-        return null;
-      }
-
-      // Set the user state to the authenticated user
-      setUser(userCredential.user);
-      return userCredential.user;
+      console.log('User does not exist in the sub-collection');
+      return null;
     } catch (error) {
       console.error(error);
       return null;
     }
-  }
+  };
+  
 
   const createUser = async (firstName, lastName, username, email, password) => {
     try {
