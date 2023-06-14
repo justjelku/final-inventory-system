@@ -207,7 +207,7 @@ const AddProduct = () => {
 				>
 					<div className="modal-header">
 						<h5 className="modal-title" id="addModalLabel">
-							Add Stock
+							Add Product
 						</h5>
 						<button
 							type="button"

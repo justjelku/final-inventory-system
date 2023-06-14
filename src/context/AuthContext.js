@@ -69,6 +69,32 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   };
+
+  const signInAdmin = async (email, password) => {
+    try {
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const authToken = await userCredential.user.getIdToken(); // Get the authentication token
+      const userDoc = await db
+        .collection('users')
+        .doc('qIglLalZbFgIOnO0r3Zu')
+        .get();
+  
+      if (userDoc.exists) {
+        setUser({
+          signedInAt: serverTimestamp()
+        });
+        return userCredential.user; // Return the user object
+      } 
+  
+      // Check if the user exists in the sub-collection
+      console.log('User does not exist in the sub-collection');
+      return null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
   
 
   const createUser = async (firstName, lastName, username, email, password) => {
@@ -223,7 +249,7 @@ const signInWithGoogle = async () => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, signIn, createUser, logout, updateProfile, signInWithEmailAndPassword, signInWithGoogle }}>
+    <AuthContext.Provider value={{ user, signIn, createUser, logout, signInAdmin, updateProfile, signInWithEmailAndPassword, signInWithGoogle }}>
       {loading ? (
         <div
           style={{

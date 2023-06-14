@@ -6,8 +6,8 @@ import ProductTabContent from './contents/Products';
 import CustomerTabContent from './contents/Customer';
 import SupplierTabContent from './contents/Supplier';
 import BranchTabContent from './contents/Branch';
-import Sidebarss from '../../navigation/sidebars';
 import WelcomePage from './WelcomePage';
+import Sidebarss from './navigation/sidebars';
 
 const RootPage = () => {
   const [isMobileView, setIsMobileView] = useState(false);

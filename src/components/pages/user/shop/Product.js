@@ -77,7 +77,7 @@ const Product = () => {
 	return (
 		<>
 		<h2 className='mt-3'>
-			Manage Products
+			Manage Stocks
 		</h2>
 			<div className="container mt-10 d-flex align-items-start">
 				<div className="row m-100 m-auto">

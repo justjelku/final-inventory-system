@@ -6,10 +6,10 @@ import ProductTabContent from './contents/Products';
 import CustomerTabContent from './contents/Customer';
 import SupplierTabContent from './contents/Supplier';
 import BranchTabContent from './contents/Branch';
-import Sidebarss from './navigation/sidebars';
 import WelcomePage from './WelcomePage';
+import Sidebarss from './navigation/sidebars';
 
-const AdminRootPage = () => {
+const SuperAdminRootPage = () => {
   const [isMobileView, setIsMobileView] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -55,19 +55,20 @@ const AdminRootPage = () => {
       <div className="container-fluid">
         <div className="row">
           <div className="col-md-3">
-          <div className="col-md-3 fixed-top">
-                <Sidebarss />
-              </div>
+            <div className="col-md-3 fixed-top">
+              <Sidebarss />
+            </div>
           </div>
           <div className="col-md-8">
             <Routes>
               <Route path="/home" component={<WelcomePage />} element={<WelcomePage />} />
-              <Route path="/inventory" component={<HomeTabContent />} element={<HomeTabContent />} />
+              <Route path="/manageuser" component={<WelcomePage />} element={<WelcomePage />} />
+              {/* <Route path="/inventory" component={<HomeTabContent />} element={<HomeTabContent />} />
               <Route path="/profile" component={<ProfileTabContent />} element={<ProfileTabContent />} />
               <Route path="/stocks" component={<ProductTabContent />} element={<ProductTabContent />} />
               <Route path="/customer" component={<CustomerTabContent />} element={<CustomerTabContent />} />
               <Route path="/supplier" component={<SupplierTabContent />} element={<SupplierTabContent />} />
-              <Route path="/branch" component={<BranchTabContent />} element={<BranchTabContent />} />
+              <Route path="/branch" component={<BranchTabContent />} element={<BranchTabContent />} /> */}
             </Routes>
           </div>
         </div>
@@ -76,4 +77,4 @@ const AdminRootPage = () => {
   );
 };
 
-export default AdminRootPage;
+export default SuperAdminRootPage;

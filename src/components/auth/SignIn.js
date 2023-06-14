@@ -57,7 +57,7 @@ const SignInPage = () => {
         // Check user role and navigate accordingly
         const userRole = userDocRef.data().role;
         if (userRole === 'admin') {
-          navigate('/admin');
+          navigate('/admin/home');
         } else {
           navigate('/');
         }

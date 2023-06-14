@@ -78,10 +78,6 @@ const ProfileTabContent = () => {
 	};
 
 	return (
-		<>
-		<h2 className='mt-3'>
-			Manage Profile
-		</h2>
 		<div>
 			{user && (
 				<>
@@ -104,7 +100,6 @@ const ProfileTabContent = () => {
 				</>
 			)}
 		</div>
-		</>
 	);
 };
 
