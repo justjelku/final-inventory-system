@@ -128,10 +128,10 @@ const Admin = () => {
             </tbody>
           </table>
           {selectedAdmin && (
-            <EditSupplier
+            <EditAdmin
               show={showEditAdminModal}
               onClose={handleCloseEditAdminModal}
-              suppliers={selectedAdmin}
+              admins={selectedAdmin}
             />
           )}
         </div>
