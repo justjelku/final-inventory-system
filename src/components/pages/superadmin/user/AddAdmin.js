@@ -9,10 +9,13 @@ import 'firebase/compat/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 
 const AddSupplier = () => {
-  const [supplierId, setSupplierId] = useState('');
-  const [supplierName, setSupplierName] = useState('');
-  const [supplierAddress, setSupplierAddress] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
+  const [userId, setUserId] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [role, setRole] = useState('');
+  const [status, setStatus] = useState('');
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -29,35 +32,39 @@ const AddSupplier = () => {
     return () => unsubscribeAuth();
   }, []);
 
-  const submitSupplier = async (e) => {
+  const submitAdmin = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
 
-      const supplierId = uuidv4();
+      const adminId = uuidv4();
 
       const collectionRef = collection(
         db,
         'users',
         'qIglLalZbFgIOnO0r3Zu',
         'basic_users',
-        userId,
-        'suppliers'
       );
 
       await addDoc(collectionRef, {
-        supplierId: supplierId,
-        supplierName: supplierName,
-        supplierAddress: supplierAddress,
-        contactNumber: contactNumber,
+        userId: adminId,
+        'first name': firstName,
+        'last name': lastName,
+        email: email,
+        username: username,
+        role: role,
+        enabled: status,
         createdtime: serverTimestamp(),
         updatedtime: serverTimestamp(),
       });
 
       setLoading(false);
-      setSupplierName('');
-      setSupplierAddress('');
-      setContactNumber('');
+      setFirstName('');
+      setLastName('');
+      setUsername('');
+      setEmail('');
+      setRole('');
+      setStatus('');
       window.location.reload();
     } catch (err) {
       setLoading(false);
@@ -69,16 +76,16 @@ const AddSupplier = () => {
   return (
     <div
       className="modal fade"
-      id="supplierModal"
+      id="adminModel"
       tabIndex="-1"
-      aria-labelledby="supplierModalLabel"
+      aria-labelledby="adminModalLabel"
       aria-hidden="true"
     >
       <div className="modal-dialog modal-dialog-centered modal-lg">
-        <form className="modal-content" onSubmit={submitSupplier}>
+        <form className="modal-content" onSubmit={submitAdmin}>
           <div className="modal-header">
-            <h5 className="modal-title" id="supplierModalLabel">
-              Add Branch
+            <h5 className="modal-title" id="adminModalLabel">
+              Add New User Admin
             </h5>
             <button
               type="button"
@@ -89,44 +96,83 @@ const AddSupplier = () => {
           </div>
           <div className="modal-body">
             <div className="mb-3">
-              <label htmlFor="supplierName" className="form-label">
-                Supplier Name
-              </label>
-              <input
-                type="text"
-                id="supplierName"
-                className="form-control"
-                value={supplierName}
-                onChange={(e) => setSupplierName(e.target.value)}
-                placeholder="Supplier Name"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="contact" className="form-label">
-                Contact Number
-              </label>
-              <input
-                type="number"
-                id="contact"
-                className="form-control"
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-                placeholder="09123456789"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="supplierAddress" className="form-label">
-                Supplier Address
-              </label>
-              <input
-                type="text"
-                id="supplierAddress"
-                className="form-control"
-                value={supplierAddress}
-                onChange={(e) => setSupplierAddress(e.target.value)}
-                placeholder="Supplier Address"
-              />
-            </div>
+          <label htmlFor="firstName" className="form-label">
+            First Name
+          </label>
+          <input
+            type="text"
+            id="firstName"
+            className="form-control"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="First Name"
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="lastName" className="form-label">
+            Last Name
+          </label>
+          <input
+            type="text"
+            id="lastName"
+            className="form-control"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Last Name"
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="username" className="form-label">
+            Email
+          </label>
+          <input
+            type="text"
+            id="username"
+            className="form-control"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">
+            Email
+          </label>
+          <input
+            type="text"
+            id="email"
+            className="form-control"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="role" className="form-label">
+            Role
+          </label>
+          <input
+            type="text"
+            id="role"
+            className="form-control"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            placeholder="Role"
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="status" className="form-label">
+            Status
+          </label>
+          <input
+            type="text"
+            id="status"
+            className="form-control"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            placeholder="Status"
+          />
+        </div>
           </div>
           <div className="modal-footer">
             <button className="btn btn-secondary" data-bs-dismiss="modal">
@@ -135,10 +181,10 @@ const AddSupplier = () => {
             <button
               type="button"
               className="btn btn-outline-primary"
-              onClick={submitSupplier}
+              onClick={submitAdmin}
               disabled={loading}
             >
-              {loading ? 'Adding...' : 'Add Supplier'}
+              {loading ? 'Adding...' : 'Add User'}
             </button>
           </div>
         </form>
