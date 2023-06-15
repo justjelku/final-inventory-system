@@ -6,10 +6,13 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
-const EditSupplier = ({ show, suppliers, onClose }) => {
-  const [supplierName, setSupplierName] = useState(suppliers.supplierName);
-  const [supplierAddress, setSupplierAddress] = useState(suppliers.supplierAddress);
-  const [contactNumber, setContactNumber] = useState(suppliers.contactNumber);
+const EditAdmin = ({ show, admins, onClose }) => {
+  const [firstName, setFirstName] = useState(admins.firstName);
+  const [lastName, setLastName] = useState(admins.lastName);
+  const [email, setEmail] = useState(admins.email);
+  const [username, setUsername] = useState(admins.username);
+  const [role, setRole] = useState(admins.role);
+  const [status, setStatus] = useState(admins.enabled);
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -26,7 +29,7 @@ const EditSupplier = ({ show, suppliers, onClose }) => {
     return () => unsubscribeAuth();
   }, []);
 
-  const updateSupplier = async (e) => {
+  const updateAdmin = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
@@ -37,19 +40,21 @@ const EditSupplier = ({ show, suppliers, onClose }) => {
         'qIglLalZbFgIOnO0r3Zu',
         'basic_users',
         userId,
-        'suppliers'
       );
 
-      const supplierId = suppliers.id;
-      const supplierData = {
-        supplierId: supplierId,
-        supplierName: supplierName,
-        supplierAddress: supplierAddress,
-        contactNumber: contactNumber,
+      const adminId = admins.id;
+      const adminData = {
+        userId: adminId,
+        'first name' : firstName,
+        'last name' : lastName,
+        email: email,
+        username: username,
+        enabled: status,
+        role: role,
         updatedtime: serverTimestamp()
       };
 
-      await updateDoc(doc(collectionRef, supplierId), supplierData);
+      await updateDoc(doc(collectionRef, adminId), adminData);
       onClose();
       window.location.reload();
     } catch (err) {
@@ -61,46 +66,85 @@ const EditSupplier = ({ show, suppliers, onClose }) => {
   return (
     <Modal show={show} onHide={onClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Edit {suppliers.supplierName}</Modal.Title>
+        <Modal.Title>Edit {admins.email}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3">
-          <label htmlFor="supplierName" className="form-label">
-            Supplier Name
+          <label htmlFor="firstName" className="form-label">
+            First Name
           </label>
           <input
             type="text"
-            id="supplierName"
+            id="firstName"
             className="form-control"
-            value={supplierName}
-            onChange={(e) => setSupplierName(e.target.value)}
-            placeholder="Supplier Name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="First Name"
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="contact" className="form-label">
-            Contact Number
-          </label>
-          <input
-            type="number"
-            id="contact"
-            className="form-control"
-            value={contactNumber}
-            onChange={(e) => setContactNumber(e.target.value)}
-            placeholder="09123456789"
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="supplierAddress" className="form-label">
-            Supplier Address
+          <label htmlFor="lastName" className="form-label">
+            Last Name
           </label>
           <input
             type="text"
-            id="supplierAddress"
+            id="lastName"
             className="form-control"
-            value={supplierAddress}
-            onChange={(e) => setSupplierAddress(e.target.value)}
-            placeholder="Supplier Address"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Last Name"
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="username" className="form-label">
+            Email
+          </label>
+          <input
+            type="text"
+            id="username"
+            className="form-control"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">
+            Email
+          </label>
+          <input
+            type="text"
+            id="email"
+            className="form-control"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="role" className="form-label">
+            Role
+          </label>
+          <input
+            type="text"
+            id="role"
+            className="form-control"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            placeholder="Role"
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="status" className="form-label">
+            Status
+          </label>
+          <input
+            type="text"
+            id="status"
+            className="form-control"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            placeholder="Status"
           />
         </div>
       </Modal.Body>
@@ -111,7 +155,7 @@ const EditSupplier = ({ show, suppliers, onClose }) => {
         <button
           type="button"
           className="btn btn-outline-primary"
-          onClick={updateSupplier}
+          onClick={updateAdmin}
           disabled={loading}
         >
           {loading ? 'Updating...' : 'Update'}
@@ -121,4 +165,4 @@ const EditSupplier = ({ show, suppliers, onClose }) => {
   )
 }
 
-export default EditSupplier
+export default EditAdmin
