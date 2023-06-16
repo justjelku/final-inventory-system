@@ -8,6 +8,7 @@ import SupplierTabContent from './contents/Supplier';
 import BranchTabContent from './contents/Branch';
 import Sidebarss from './navigation/sidebars';
 import WelcomePage from './WelcomePage';
+import ManageUserTabContent from './contents/ManageUser';
 
 const AdminRootPage = () => {
   const [isMobileView, setIsMobileView] = useState(false);
@@ -68,6 +69,7 @@ const AdminRootPage = () => {
               <Route path="/customer" component={<CustomerTabContent />} element={<CustomerTabContent />} />
               <Route path="/supplier" component={<SupplierTabContent />} element={<SupplierTabContent />} />
               <Route path="/branch" component={<BranchTabContent />} element={<BranchTabContent />} />
+              <Route path="/manageuser" component={<ManageUserTabContent />} element={<ManageUserTabContent />} />
             </Routes>
           </div>
         </div>

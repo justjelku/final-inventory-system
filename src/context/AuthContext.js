@@ -97,35 +97,17 @@ export const AuthProvider = ({ children }) => {
   };
   
 
-  const createUser = async (firstName, lastName, username, email, password) => {
+  const createUser = async (email, password) => {
     try {
-      const auth = getAuth()
+      const auth = getAuth();
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const authToken = await userCredential.user.getIdToken();
-      const uid = userCredential.user.uid;
-  
-      await setDoc(doc(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users"), {
-        uid: uid,
-        role: 'basic',
-        'first name': firstName,
-        'last name': lastName,
-        username: username,
-        email: email,
-        createdAt: serverTimestamp(),
-        signedInAt: serverTimestamp()
-      });
-  
-      setUser({
-        uid: uid,
-        email: email,
-        role: 'basic'
-      });
-  
+      const authToken = await userCredential.user.getIdToken(); // Get the authentication token
       return userCredential;
     } catch (error) {
       throw new Error(error.message);
     }
   };
+  
   
 
   const sendPasswordReset = async (email) => {

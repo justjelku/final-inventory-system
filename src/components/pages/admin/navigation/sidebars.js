@@ -106,6 +106,9 @@ const Sidebarss = () => {
 						<NavLink exact to="/admin/branch" activeClassName="activeClicked">
 							<CDBSidebarMenuItem icon="building">Branch</CDBSidebarMenuItem>
 						</NavLink>
+						<NavLink exact to="/admin/manageuser" activeClassName="activeClicked">
+							<CDBSidebarMenuItem icon="building">Manage User</CDBSidebarMenuItem>
+						</NavLink>
 					</CDBSidebarMenu>
 				</CDBSidebarContent>
 

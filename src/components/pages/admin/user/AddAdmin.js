@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 
 const AddUser = () => {
-  const [userId, setUserId] = useState('');
+  const [currentId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
   const { createUser } = useAuth();
   const [lastName, setLastName] = useState('');
@@ -37,7 +37,7 @@ const AddUser = () => {
     });
 
     return () => unsubscribeAuth();
-  }, []);
+  }, [currentId]);
 
   const submitAdmin = async (e) => {
     e.preventDefault();
@@ -53,10 +53,13 @@ const AddUser = () => {
         'users',
         'qIglLalZbFgIOnO0r3Zu',
         'basic_users',
+        currentId,
+        'user',
         userId
       );
   
       await setDoc(userDocRef, {
+        adminId: currentId,
         userId: userId,
         'first name': firstName,
         'last name': lastName,
@@ -158,7 +161,7 @@ const AddUser = () => {
                 placeholder="Role"
               >
                 <option value="">Select Role</option>
-                <option value="admin">Admin</option>
+                {/* <option value="admin">Admin</option> */}
                 <option value="basic">Basic</option>
               </select>
             </div>

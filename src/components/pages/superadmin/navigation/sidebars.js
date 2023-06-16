@@ -15,8 +15,8 @@ import 'firebase/compat/firestore';
 import {
 	collection,
 	onSnapshot,
-	query,
-	where
+	doc,
+	getDoc
 } from 'firebase/firestore';
 import ProfileIcon from '../profile/ProfileIcon';
 import { useAuth } from '../../../../context/AuthContext';
@@ -45,23 +45,23 @@ const Sidebarss = () => {
 
 	useEffect(() => {
 		if (userId) {
-			const unsubscribe = onSnapshot(
-				query(
-					collection(db, 'users'),
-					where('userId', '==', userId)
-				),
-				(querySnapshot) => {
-					let userArr = [];
-					querySnapshot.forEach((doc) => {
-						userArr.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
-					});
-					setUser(userArr[0]); // Assuming there is only one user document
-				}
-			);
-
-			return () => unsubscribe();
+		  const getUserData = async () => {
+			try {
+			  const docRef = doc(db, 'users', 'qIglLalZbFgIOnO0r3Zu');
+			  const docSnap = await getDoc(docRef);
+			  if (docSnap.exists()) {
+				setUser({ id: docSnap.id, ...docSnap.data() });
+			  } else {
+				console.log('Document not found!');
+			  }
+			} catch (error) {
+			  console.error('Error getting document:', error);
+			}
+		  };
+	  
+		  getUserData();
 		}
-	}, [userId]);
+	  }, [userId]);
 
 	const toggleSidebar = () => {
 		setSidebarMinimized(!sidebarMinimized);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, getDocs, getDoc, doc } from 'firebase/firestore';
 import { BsGraphUp, BsClock, BsClipboardData, BsCart } from 'react-icons/bs';
 import { db } from '../../../firebase';
 
@@ -10,8 +10,8 @@ const WelcomePage = () => {
   const [totalQuantities, setTotalQuantities] = useState(0);
 const [stockIn, setStockIn] = useState(0);
 const [productOut, setProductOut] = useState([]);
-const [totalStockOutQuantity, setTotalStockOutQuantity] = useState(0); // Declare the state variable
-const [totalStockInQuantity, setTotalStockInQuantity] = useState(0); 
+const [userCount, setUserCount] = useState(0); // Declare the state variable
+const [adminCount, setAdminCount] = useState(0); 
 const [productIn, setProductIn] = useState([]);
 const [products, setProducts] = useState([]);
 const [userId, setUserId] = useState(null);
@@ -20,7 +20,9 @@ const [userId, setUserId] = useState(null);
   // STATE
   const [showModal, setShowModal] = useState(false)
   const [user, setUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [photo, setPhoto] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
@@ -50,16 +52,16 @@ const [userId, setUserId] = useState(null);
     });
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.productTitle.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter((admin) =>
+  admin.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const sortedProducts = sortField
-    ? [...filteredProducts].sort((a, b) => {
+  const sortedUsers = sortField
+    ? [...filteredUsers].sort((a, b) => {
       const sortResult = a[sortField].localeCompare(b[sortField]);
       return sortDirection === 'asc' ? sortResult : -sortResult;
     })
-    : filteredProducts;
+    : filteredUsers;
 
   useEffect(() => {
     const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
@@ -74,24 +76,24 @@ const [userId, setUserId] = useState(null);
   }, []);
 
   useEffect(() => {
-    if (userId) {
-      const unsubscribe = onSnapshot(
-        query(
-          collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users'),
-          where('userId', '==', userId)
-        ),
-        (querySnapshot) => {
-          let userArr = [];
-          querySnapshot.forEach((doc) => {
-            userArr.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
-          });
-          setUser(userArr[0]); // Assuming there is only one user document
-        }
-      );
-
-      return () => unsubscribe();
-    }
-  }, [userId]);
+		if (userId) {
+		  const getUserData = async () => {
+			try {
+			  const docRef = doc(db, 'users', 'qIglLalZbFgIOnO0r3Zu');
+			  const docSnap = await getDoc(docRef);
+			  if (docSnap.exists()) {
+				setUser({ id: docSnap.id, ...docSnap.data() });
+			  } else {
+				console.log('Document not found!');
+			  }
+			} catch (error) {
+			  console.error('Error getting document:', error);
+			}
+		  };
+	  
+		  getUserData();
+		}
+	  }, [userId]);
 
   useEffect(() => {
     if (userId) {
@@ -110,198 +112,91 @@ const [userId, setUserId] = useState(null);
     }
   }, [userId]);
 
+
   useEffect(() => {
-    if (userId) {
-      const getProduct = query(
-        collection(
-          db,
-          'users',
-          'qIglLalZbFgIOnO0r3Zu',
-          'basic_users',
-          userId,
-          'stock'
-        )
+    const getAdmin = async () => {
+      const AdminsRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
       );
-      const unsubscribe = onSnapshot(getProduct, (querySnapshot) => {
-        let productsArr = [];
-        querySnapshot.forEach((doc) => {
-          productsArr.push({ id: doc.id, productTitle: doc.productTitle, ...doc.data() }); // Include all fields in the object
-        });
-        setProducts(productsArr);
-      });
-      return () => unsubscribe();
-    }
-  }, [setProducts, userId]);
 
-  useEffect(() => {
-    if (userId) {
-      const getProduct = query(
-        collection(
-          db,
-          'users',
-          'qIglLalZbFgIOnO0r3Zu',
-          'basic_users',
-          userId,
-          'stock'
-        )
-      );
-      const unsubscribe = onSnapshot(getProduct, (querySnapshot) => {
-        let productsArr = [];
-        let totalQuantity = 0;
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.stock === 'Stock Out') {
-            const stockOutQuantity = data.productQuantity || 0;
-            totalQuantity += stockOutQuantity;
-          }
-          productsArr.push({ id: doc.id, productTitle: doc.productTitle, ...data });
-        });
-
-        setProductOut(productsArr);
-        setTotalStockOutQuantity(totalQuantity); // Update the total stock out quantity
-      });
-
-      return () => unsubscribe();
-    }
-  }, [setProductOut, setTotalStockOutQuantity, userId]);
-
-  useEffect(() => {
-    if (userId) {
-      const getProduct = query(
-        collection(
-          db,
-          'users',
-          'qIglLalZbFgIOnO0r3Zu',
-          'basic_users',
-          userId,
-          'stock'
-        )
-      );
-      const unsubscribe = onSnapshot(getProduct, (querySnapshot) => {
-        let productsArr = [];
-        let totalQuantity = 0;
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.stock === 'Stock In') {
-            const stockOutQuantity = data.productQuantity || 0;
-            totalQuantity += stockOutQuantity;
-          }
-          productsArr.push({ id: doc.id, productTitle: doc.productTitle, ...data });
-        });
-
-        setProductIn(productsArr);
-        setTotalStockInQuantity(totalQuantity); // Update the total stock out quantity
-      });
-
-      return () => unsubscribe();
-    }
-  }, [setProductIn, setTotalStockInQuantity, userId]);
-
-  useEffect(() => {
-    const getTotalQuantities = async () => {
-      const querySnapshot = await getDocs(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products'));
-      let total = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.productQuantity) {
-          total += parseInt(data.productQuantity);
-        }
-      });
-      console.log(`Total quantities: ${total}`);
-      setTotalQuantities(total);
-    };
-    
-    if (userId) {
-      getTotalQuantities();
-    }
-  }, [userId]); 
-
-  useEffect(() => {
-    const getTotalStockIn = async () => {
-      if (selectedProduct && selectedProduct.productId) {
-        const querySnapshot = await getDocs(
-          collection(
-            db,
-            'users',
-            'qIglLalZbFgIOnO0r3Zu',
-            'basic_users',
-            userId,
-            'products',
-            selectedProduct.productId,
-            'stock_in'
-          )
-        );
-        let total = 0;
-        let zeroQtyCount = 0;
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.productQuantity) {
-            total += parseInt(data.productQuantity);
-          } else {
-            zeroQtyCount++;
-          }
-        });
-        console.log(`Total quantities: ${total}`);
-        console.log(`Total products with quantity of zero: ${zeroQtyCount}`);
-        setStockIn(total);
+      try {
+        const querySnapshot = await getDocs(AdminsRef);
+        const adminData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        setUsers(adminData);
+      } catch (err) {
+        console.log(err);
       }
     };
-  
-    if (userId) {
-      getTotalStockIn();
-    }
-  }, [userId, selectedProduct]);
 
-  useEffect(() => {
-    const getTotalProductIn = async () => {
-      const querySnapshot = await getDocs(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products'));
-      let total = 0;
-      let nonZeroQtyCount = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.productQuantity && parseInt(data.productQuantity) > 0) {
-          total += parseInt(data.productQuantity);
-          nonZeroQtyCount++;
-        }
-      });
-      console.log(`Total quantities: ${total}`);
-      console.log(`Total products with quantity greater than zero: ${nonZeroQtyCount}`);
-      setProductIn(total);
-    };
-    
     if (userId) {
-      getTotalProductIn();
+      getAdmin();
     }
   }, [userId]);
 
   useEffect(() => {
-		if (userId) {
-			const unsubscribe = onSnapshot(
-				query(
-					collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users'),
-					where('userId', '==', userId)
-				),
-				(querySnapshot) => {
-					let userArr = [];
-					querySnapshot.forEach((doc) => {
-						userArr.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
-					});
-					setUser(userArr[0]); // Assuming there is only one user document
-				}
-			);
+    const getAdminCount = async () => {
+      const AdminsRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
+      );
+  
+      try {
+        const querySnapshot = await getDocs(AdminsRef);
+        const adminData = querySnapshot.docs
+          .map((doc) => ({ ...doc.data(), id: doc.id }))
+          .filter((user) => user.role === 'admin'); // Filter the users with the role field 'admin'
+        const adminCount = adminData.length; // Get the total count of admin users
+        console.log('Total number of admin users:', adminCount);
+        setAdminCount(adminCount);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+  
+    if (userId) {
+      getAdminCount();
+    }
+  }, [userId]);
 
-			return () => unsubscribe();
-		}
-	}, [userId]);
+  useEffect(() => {
+    const getAdminCount = async () => {
+      const AdminsRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
+      );
+  
+      try {
+        const querySnapshot = await getDocs(AdminsRef);
+        const adminData = querySnapshot.docs
+          .map((doc) => ({ ...doc.data(), id: doc.id }))
+          .filter((user) => user.role === 'basic'); // Filter the users with the role field 'admin'
+        const userCount = adminData.length; // Get the total count of admin users
+        console.log('Total number of admin users:', userCount);
+        setUserCount(userCount);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+  
+    if (userId) {
+      getAdminCount();
+    }
+  }, [userId]);
+  
   
   
   return (
     <>
     <h2 className='mt-3'>
       Hi, {user && (
-        user['first name']
+        user.username
       )}
       (super admin user)
     </h2>
@@ -315,8 +210,8 @@ const [userId, setUserId] = useState(null);
                   <div className="d-flex align-items-center">
                     <BsGraphUp className="fs-5 me-3 text-primary" />
                     <div>
-                      <h5 className="card-title">Total Quantities</h5>
-                      <p className="card-text">{totalStockInQuantity+totalStockOutQuantity+productIn}</p>
+                      <h5 className="card-title">Admin Users</h5>
+                      <p className="card-text">{adminCount}</p>
                     </div>
                   </div>
                 </div>
@@ -328,14 +223,14 @@ const [userId, setUserId] = useState(null);
                   <div className="d-flex align-items-center">
                     <BsClock className="fs-2 me-3 text-primary" />
                     <div>
-                      <h5 className="card-title">Stock In</h5>
-                      <p className="card-text">{totalStockInQuantity}</p>
+                      <h5 className="card-title">Basic Users</h5>
+                      <p className="card-text">{userCount}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="col-md-6">
+            {/* <div className="col-md-6">
               <div className="card mb-4">
                 <div className="card-body">
                   <div className="d-flex align-items-center">
@@ -360,7 +255,7 @@ const [userId, setUserId] = useState(null);
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -373,37 +268,31 @@ const [userId, setUserId] = useState(null);
           aria-label="Search"
           value={searchTerm}
           onChange={handleSearch}
-          placeholder="Search by product title"
+          placeholder="Search User"
         />
         <table className="table table-striped table-hover">
           <thead className='ms-auto'>
             <tr>
-              <th scope="col" className="text-center" style={{ width: '200px' }} onClick={() => handleSort('productTitle')}>
-                Product Title{' '}
-                {sortField === 'productTitle' && (
+              <th scope="col" className="text-center" style={{ width: '200px' }} onClick={() => handleSort('email')}>
+                Email{' '}
+                {sortField === 'email' && (
                   <i className={`bi bi-chevron-${sortDirection === 'asc' ? 'up' : 'down'}`} />
                 )}
               </th>
-              <th scope="col" className="text-center">Category</th>
-              <th scope="col" className="text-center">Color</th>
-              <th scope="col" className="text-center">Quantity</th>
-              <th scope="col" className="text-center">Size</th>
-              <th scope="col" className="text-center">Brand</th>
-              <th scope="col" className="text-center">Branch</th>
-              <th scope="col" className="text-center">Type</th>
+              <th scope="col" className="text-center">UserId</th>
+              <th scope="col" className="text-center">Username</th>
+              <th scope="col" className="text-center">Role</th>
+              {/* <th scope="col" className="text-center">Data Created</th> */}
             </tr>
           </thead>
           <tbody>
-            {sortedProducts.map((product) => (
-              <tr key={product.id} className={selectedRows.includes(product.id) ? 'selected' : ''} onClick={() => handleRowSelect(product.id)}>
-                <td className="text-center justify-content-center">{product.productTitle}</td>
-                <td className="text-center justify-content-center">{product.category}</td>
-                <td className="text-center justify-content-center">{product.color}</td>
-                <td className="text-center justify-content-center">{product.productQuantity} Pairs</td>
-                <td className="text-center justify-content-center">{product.sizeSystem} {product.productSize}</td>
-                <td className="text-center justify-content-center">{product.productBrand}</td>
-                <td className="text-center justify-content-center">{product.branch}</td>
-                <td className="text-center justify-content-center">{product.stock}</td>
+            {sortedUsers.map((admin) => (
+              <tr key={admin.id} className={selectedRows.includes(admin.id) ? 'selected' : ''} onClick={() => handleRowSelect(admin.id)}>
+                <td className="text-center justify-content-center">{admin.email}</td>
+                <td className="text-center justify-content-center">{admin.userId}</td>
+                <td className="text-center justify-content-center">{admin.username}</td>
+                <td className="text-center justify-content-center">{admin.role}</td>
+                {/* <td className="text-center justify-content-center">{admin.createdAt}</td> */}
               </tr>
             ))}
           </tbody>

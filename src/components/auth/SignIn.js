@@ -136,17 +136,8 @@ const SignInPage = () => {
                   <Button className="btn btn-info mt-3" variant="primary" type="submit" onClick={signinWithGoogle}>
                     Login with Google
                   </Button>
-                  <div>
-          <Link to="/reset">Forgot Password</Link>
-        </div>
                 </div>
               </form>
-              <p className="text-center mt-3">
-                Don't have an account?{' '}
-                <NavLink to="#" onClick={() => setShowSignUpModal(true)}>
-                  Sign Up
-                </NavLink>
-              </p>
             </div>
           </div>
         </div>

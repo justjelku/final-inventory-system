@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, onSnapshot, query } from 'firebase/firestore';
 import { Dropdown } from 'react-bootstrap';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
@@ -27,27 +27,47 @@ const Admin = () => {
   }, []);
 
   useEffect(() => {
-    const getAdmin = async () => {
-      const AdminsRef = collection(
-        db,
-        'users',
-        'qIglLalZbFgIOnO0r3Zu',
-        'basic_users',
-      );
+		if (userId) {
+			const unsubscribe = onSnapshot(
+				query(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'user')),
+				(querySnapshot) => {
+					let productData = [];
+					querySnapshot.forEach((doc) => {
+						productData.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
+					});
+					setAdmin(productData); // Assuming there is only one user document
+				}
+			);
 
-      try {
-        const querySnapshot = await getDocs(AdminsRef);
-        const adminData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-        setAdmin(adminData);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+			return () => unsubscribe();
+		}
+	}, [userId]);
 
-    if (userId) {
-      getAdmin();
-    }
-  }, [userId]);
+
+  // useEffect(() => {
+  //   const getAdmin = async () => {
+  //     const AdminsRef = collection(
+  //       db,
+  //       'users',
+  //       'qIglLalZbFgIOnO0r3Zu',
+  //       'basic_users',
+  //       userId,
+  //       'user'
+  //     );
+
+  //     try {
+  //       const querySnapshot = await getDocs(AdminsRef);
+  //       const adminData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+  //       setAdmin(adminData);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   };
+
+  //   if (userId) {
+  //     getAdmin();
+  //   }
+  // }, [userId]);
 
   const deleteAdmin = async (id) => {
     const confirmation = window.confirm("Are you sure you want to delete this Admin?");

@@ -16,7 +16,7 @@ const EditAdmin = ({ show, admins, onClose }) => {
   const [status, setStatus] = useState(admins.enabled);
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState(null);
+  const [currentId, setUserId] = useState(null);
 
   useEffect(() => {
     const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
@@ -28,7 +28,7 @@ const EditAdmin = ({ show, admins, onClose }) => {
     });
 
     return () => unsubscribeAuth();
-  }, []);
+  }, [currentId]);
 
   const updateAdmin = async (e) => {
     e.preventDefault();
@@ -40,13 +40,17 @@ const EditAdmin = ({ show, admins, onClose }) => {
         'users',
         'qIglLalZbFgIOnO0r3Zu',
         'basic_users',
+        currentId,
+        'user',
+        userId
       );
 
-      const adminId = admins.id;
+      const userId = admins.id;
 
       // Check if firstName is defined, otherwise use an empty string
       const adminData = {
-        userId: adminId,
+        adminId: currentId,
+        userId: userId,
         'first name': firstName || '',
         'last name': lastName,
         email: email,
@@ -56,7 +60,7 @@ const EditAdmin = ({ show, admins, onClose }) => {
         updatedtime: serverTimestamp()
       };
 
-      await updateDoc(doc(collectionRef, adminId), adminData);
+      await updateDoc(doc(collectionRef, userId), adminData);
       onClose();
       window.location.reload();
     } catch (err) {

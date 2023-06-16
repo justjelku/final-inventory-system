@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import HomeTabContent from './contents/Home';
-import ProfileTabContent from './contents/Profile';
-import ProductTabContent from './contents/Products';
-import CustomerTabContent from './contents/Customer';
-import SupplierTabContent from './contents/Supplier';
-import BranchTabContent from './contents/Branch';
 import WelcomePage from './WelcomePage';
 import Sidebarss from './navigation/sidebars';
+import ManageUserTabContent from './contents/ManageUser';
 
 const SuperAdminRootPage = () => {
   const [isMobileView, setIsMobileView] = useState(false);
@@ -62,7 +57,7 @@ const SuperAdminRootPage = () => {
           <div className="col-md-8">
             <Routes>
               <Route path="/home" component={<WelcomePage />} element={<WelcomePage />} />
-              <Route path="/manageuser" component={<WelcomePage />} element={<WelcomePage />} />
+              <Route path="/manageuser" component={<ManageUserTabContent />} element={<ManageUserTabContent />} />
               {/* <Route path="/inventory" component={<HomeTabContent />} element={<HomeTabContent />} />
               <Route path="/profile" component={<ProfileTabContent />} element={<ProfileTabContent />} />
               <Route path="/stocks" component={<ProductTabContent />} element={<ProductTabContent />} />
