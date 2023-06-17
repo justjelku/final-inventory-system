@@ -132,7 +132,7 @@ const Sidebarss = () => {
 										</>
 									)}
 									<ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-										<li>
+										{/* <li>
 											<a className="dropdown-item" href="/profile">
 												Profile
 											</a>
@@ -144,7 +144,7 @@ const Sidebarss = () => {
 										</li>
 										<li>
 											<hr className="dropdown-divider" />
-										</li>
+										</li> */}
 										<li>
 											<a className="dropdown-item" onClick={handleLogout}>
 												Logout

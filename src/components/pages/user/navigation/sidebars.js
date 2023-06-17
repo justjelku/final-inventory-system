@@ -129,7 +129,7 @@ import { db } from '../../../../firebase';
 					  </>
 					)}
 					<ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-					  <li>
+					  {/* <li>
 						<a className="dropdown-item" href="/profile">
 						  Profile
 						</a>
@@ -141,7 +141,7 @@ import { db } from '../../../../firebase';
 					  </li>
 					  <li>
 						<hr className="dropdown-divider" />
-					  </li>
+					  </li> */}
 					  <li>
 						<a className="dropdown-item" onClick={handleLogout}>
 						  Logout
