@@ -13,7 +13,7 @@ export function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>s
+        <Routes>
           <Route path="/signInAdmin" element={<SignInAdmin />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/signup" element={<SignUpPage />} />
