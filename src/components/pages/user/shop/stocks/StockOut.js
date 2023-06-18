@@ -156,6 +156,7 @@ const StockOut = ({ product, show, onClose }) => {
       const stocksRef = doc(productRef, 'stock_history', stockoutId);
       const stockhistoryRef = doc(stockRef, stockoutId);
       const stockOutData = {
+        stockId: stockoutId,
         productTitle,
         productSize: parseInt(size),
         productQuantity: parseInt(quantity),
