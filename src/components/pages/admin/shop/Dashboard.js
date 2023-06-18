@@ -9,6 +9,7 @@ import ProductHistoryModal from './stocks/StockHistory';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import Barcode from 'react-barcode';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -137,25 +138,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      {/* <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-start pt-3 pb-2 mb-3 border-bottom m-10">
-        <h1 className="h2">Dashboard</h1>
-        <div className="btn-toolbar mb-2 mb-md-0">
-          <div className="btn-group me-2">
-            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleShare}>
-              Share
-            </button>
-            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleExport}>
-              Export
-            </button>
-          </div>
-          <button type="button" className="btn btn-sm btn-outline-secondary dropdown-toggle">
-            <span data-feather="calendar"></span>
-            Select date
-          </button>
-        </div>
-      </div> */}
       <ChartComponent />
-      {/* <canvas className="my-4 w-100" id="myChart" width="900" height="380"></canvas> */}
       <div className="table-responsive">
         <input
           type="search"
@@ -165,12 +148,12 @@ const Dashboard = () => {
           onChange={handleSearch}
           placeholder="Search by product title"
         />
-        <table className="table table-striped table-hover table">
+        <table className="table table-striped table-hover table-responsive">
           <thead className='ms-auto'>
             <tr>
               <th scope="col" className="text-center">Image</th>
-              <th scope="col" className="text-center" style={{ width: '200px' }} onClick={() => handleSort('productTitle')}>
-                Product Title{' '}
+              <th scope="col" className="text-center" onClick={() => handleSort('productTitle')}>
+                Product{' '}
                 {sortField === 'productTitle' && (
                   <i className={`bi bi-chevron-${sortDirection === 'asc' ? 'up' : 'down'}`} />
                 )}
@@ -200,7 +183,8 @@ const Dashboard = () => {
                 <td className="text-center justify-content-center">{product.sizeSystem} {product.productSize}</td>
                 <td className="text-center justify-content-center">{product.productBrand}</td>
                 <td className="text-center justify-content-center">{product.branch}</td>
-                <td className="text-center justify-content-center">{product.barcode}</td>
+                <td className="text-center justify-content-center"><Barcode value={product.barcodeId} width={1.2} height={50} />
+</td>
                 <td>
                   <div className="d-flex justify-content-center">
                     <Dropdown>

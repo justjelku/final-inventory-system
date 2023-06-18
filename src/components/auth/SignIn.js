@@ -54,21 +54,76 @@ const SignInPage = () => {
         .get();
   
       if (userDocRef.exists) {
-        // Check user role and navigate accordingly
-        const userRole = userDocRef.data().role;
-        if (userRole === 'admin') {
-          navigate('/admin/home');
+        const userData = userDocRef.data();
+        const userRole = userData.role;
+        const userStatus = userData.enabled;
+        let loginAttempts = userData.loginAttempts || 0;
+  
+        if (userStatus === 'true') {
+          if (loginAttempts < 3) {
+            if (userRole === 'admin') {
+              navigate('/admin/home');
+            } else if (userRole === 'basic') {
+              navigate('/');
+            } else {
+              setError('User role is not allowed.');
+            }
+          } else {
+            // Disable user account
+            await db
+              .collection('users')
+              .doc('qIglLalZbFgIOnO0r3Zu')
+              .collection('basic_users')
+              .doc(user.uid)
+              .update({ enabled: 'false' });
+  
+            setError('User account is disabled.');
+          }
         } else {
-          navigate('/');
+          setError('User is disabled.');
         }
       } else {
         setError('User not found. Please check your email or sign up.');
       }
     } catch (error) {
-      if (error.code === 'auth/user-not-found') {
-        setError('User not found. Please check your email or sign up.');
-      } else if (error.code === 'auth/wrong-password') {
-        setError('Incorrect password. Please try again.');
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        const user = await signIn(email, password);
+        const userDocRef = await db
+          .collection('users')
+          .doc('qIglLalZbFgIOnO0r3Zu')
+          .collection('basic_users')
+          .doc(user.uid)
+          .get();
+          
+        if (userDocRef.exists) {
+          const userData = userDocRef.data();
+          let loginAttempts = userData.loginAttempts || 0;
+          
+          loginAttempts += 1;
+  
+          if (loginAttempts >= 3) {
+            // Disable user account
+            await db
+              .collection('users')
+              .doc('qIglLalZbFgIOnO0r3Zu')
+              .collection('basic_users')
+              .doc(user.uid)
+              .update({ enabled: false });
+  
+            setError('User account is disabled.');
+          } else {
+            await db
+              .collection('users')
+              .doc('qIglLalZbFgIOnO0r3Zu')
+              .collection('basic_users')
+              .doc(user.uid)
+              .update({ loginAttempts });
+            
+            setError(`Incorrect email or password. ${3 - loginAttempts} attempts left.`);
+          }
+        } else {
+          setError('User not found. Please check your email or sign up.');
+        }
       } else {
         setError(error.message);
         console.log(error.message);
@@ -76,11 +131,49 @@ const SignInPage = () => {
     }
   };
   
+  
+  
 
   const signinWithGoogle = async (e) => {
     e.preventDefault();
-    await signInWithGoogle(email, password);
-      navigate('/');
+      try {
+        const user = await signInWithGoogle(email, password);
+        const userDocRef = await db
+          .collection('users')
+          .doc('qIglLalZbFgIOnO0r3Zu')
+          .collection('basic_users')
+          .doc(user.uid)
+          .get();
+    
+        if (userDocRef.exists) {
+          const userData = userDocRef.data();
+          const userRole = userData.role;
+          const userStatus = userData.enabled;
+    
+          if (userStatus === 'true') {
+            if (userRole === 'admin') {
+              navigate('/admin/home');
+            } else if (userRole === 'basic') {
+              navigate('/');
+            } else {
+              setError('User role is not allowed.');
+            }
+          } else {
+            setError('User is disabled.');
+          }
+        } else {
+          setError('User not found. Please check your email or sign up.');
+        }
+      } catch (error) {
+        if (error.code === 'auth/user-not-found') {
+          setError('User not found. Please check your email or sign up.');
+        } else if (error.code === 'auth/wrong-password') {
+          setError('Incorrect password. Please try again.');
+        } else {
+          setError(error.message);
+          console.log(error.message);
+        }
+      }
   };
   
   

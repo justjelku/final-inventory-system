@@ -9,6 +9,7 @@ import ProductHistoryModal from './stocks/StockHistory';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import Barcode from 'react-barcode';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -200,7 +201,7 @@ const Dashboard = () => {
                 <td className="text-center justify-content-center">{product.sizeSystem} {product.productSize}</td>
                 <td className="text-center justify-content-center">{product.productBrand}</td>
                 <td className="text-center justify-content-center">{product.branch}</td>
-                <td className="text-center justify-content-center">{product.barcode}</td>
+                <td className="text-center justify-content-center"><Barcode value={product.barcodeId} /></td>
                 <td>
                   <div className="d-flex justify-content-center">
                     <Dropdown>

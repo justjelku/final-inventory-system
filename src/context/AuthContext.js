@@ -7,7 +7,7 @@ import {
   collection,
   where,
   addDoc,
-  setDoc, 
+  setDoc,
   doc,
   serverTimestamp,
   updateDoc
@@ -40,6 +40,7 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const auth = getAuth();
 
   const signIn = async (email, password) => {
@@ -53,20 +54,44 @@ export const AuthProvider = ({ children }) => {
         .collection('basic_users')
         .doc(userCredential.user.uid)
         .get();
-  
+
       if (userDoc.exists) {
-        setUser({
-          signedInAt: serverTimestamp()
-        });
+        const userData = userDoc.data();
+        const userEnabled = userData.enabled;
+
+        if (userEnabled === 'true') {
+          await setDoc(
+            userDoc.ref,
+            {
+              signedAt: serverTimestamp()
+            },
+            { merge: true }
+          );
+        } else {
+          await setDoc(
+            userDoc.ref,
+            {
+              signedInFailed: serverTimestamp()
+            },
+            { merge: true }
+          );
+        }
+
         return userCredential.user; // Return the user object
       }
-  
+
       // Check if the user exists in the sub-collection
       console.log('User does not exist in the sub-collection');
       return null;
     } catch (error) {
-      console.error(error);
-      return null;
+      if (error.code === 'auth/user-not-found') {
+        setError('Invalid email. Please check your email or sign up.');
+      } else if (error.code === 'auth/wrong-password') {
+        setError('Invalid password. Please check your password.');
+      } else {
+        setError(error.message);
+        console.log(error.message);
+      }
     }
   };
 
@@ -79,14 +104,14 @@ export const AuthProvider = ({ children }) => {
         .collection('users')
         .doc('qIglLalZbFgIOnO0r3Zu')
         .get();
-  
+
       if (userDoc.exists) {
         setUser({
           signedInAt: serverTimestamp()
         });
         return userCredential.user; // Return the user object
-      } 
-  
+      }
+
       // Check if the user exists in the sub-collection
       console.log('User does not exist in the sub-collection');
       return null;
@@ -95,7 +120,7 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   };
-  
+
 
   const createUser = async (email, password) => {
     try {
@@ -107,8 +132,8 @@ export const AuthProvider = ({ children }) => {
       throw new Error(error.message);
     }
   };
-  
-  
+
+
 
   const sendPasswordReset = async (email) => {
     try {
@@ -132,7 +157,7 @@ export const AuthProvider = ({ children }) => {
         username: username,
         email: email,
       });
-  
+
       // Update the user state with the new profile information
       setUser((prevUser) => ({
         ...prevUser,
@@ -141,12 +166,12 @@ export const AuthProvider = ({ children }) => {
         username: username,
         email: email,
       }));
-  
+
       // Update the user's password if a new password is provided
       if (password) {
         await updatePassword(user, password);
       }
-  
+
       // Success notification or redirection
     } catch (error) {
       // Error handling
@@ -154,38 +179,38 @@ export const AuthProvider = ({ children }) => {
       alert(error.message);
     }
   };
-  
+
 
   const googleProvider = new GoogleAuthProvider();
-const signInWithGoogle = async () => {
-  try {
-    const res = await signInWithPopup(auth, googleProvider);
-    const user = res.user;
+  const signInWithGoogle = async () => {
+    try {
+      const res = await signInWithPopup(auth, googleProvider);
+      const user = res.user;
 
-    // Check if the user already exists in the Firestore collection
-    const q = query(
-      collection(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users"),
-      where("uid", "==", user.uid)
-    );
-    const docs = await getDocs(q);
-    if (docs.length === 0) {
-      // User does not exist, add/update the user's document in the Firestore collection
-      await setDoc(doc(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users", user.uid), {
-        userId: user.uid,
-        username: user.displayName,
-        authProvider: "google",
-        email: user.email,
-        role: 'basic',
-        'first name': '',
-        'last name': '',
-        signedInAt: serverTimestamp()
-      });
+      // Check if the user already exists in the Firestore collection
+      const q = query(
+        collection(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users"),
+        where("uid", "==", user.uid)
+      );
+      const docs = await getDocs(q);
+      if (docs.length === 0) {
+        // User does not exist, add/update the user's document in the Firestore collection
+        await setDoc(doc(db, "users", "qIglLalZbFgIOnO0r3Zu", "basic_users", user.uid), {
+          userId: user.uid,
+          username: user.displayName,
+          authProvider: "google",
+          email: user.email,
+          role: 'admin',
+          'first name': '',
+          'last name': '',
+          signedInAt: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
     }
-  } catch (error) {
-    console.error(error);
-    alert(error.message);
-  }
-};
+  };
 
 
   const logout = async () => {

@@ -99,5 +99,13 @@ body{
       margin-top: 10px;
     }
   }
+
+  @media (max-width: 768px) {
+    table.table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+  }
+  
   
   

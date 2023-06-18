@@ -11,7 +11,6 @@ import {
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-
 import EditProduct from './EditProduct';
 import AddProduct from './AddProduct';
 

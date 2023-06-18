@@ -51,14 +51,14 @@ const SignInAdmin = () => {
             }
         } catch (error) {
             if (error.code === 'auth/user-not-found') {
-                setError('User not found. Please check your email or sign up.');
+              setError('Invalid email. Please check your email or sign up.');
             } else if (error.code === 'auth/wrong-password') {
-                setError('Incorrect password. Please try again.');
+              setError('Invalid password. Please check your password.');
             } else {
-                setError(error.message);
-                console.log(error.message);
+              setError(error.message);
+              console.log(error.message);
             }
-        }
+          }
     };
 
 
