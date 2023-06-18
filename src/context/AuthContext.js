@@ -199,6 +199,7 @@ export const AuthProvider = ({ children }) => {
           userId: user.uid,
           username: user.displayName,
           authProvider: "google",
+          enabled: 'true',
           email: user.email,
           role: 'admin',
           'first name': '',
