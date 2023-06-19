@@ -113,7 +113,11 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
 
   const handleExport = () => {
     const modalContent = document.getElementById('modalContent');
-    html2pdf().from(modalContent).save('stockcard.pdf');
+    const options = {
+      filename: 'stockcard.pdf',
+      orientation: 'landscape' // Set the paper orientation to landscape
+    };
+    html2pdf().set(options).from(modalContent).save();
   };
   
  
