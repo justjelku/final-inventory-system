@@ -6,6 +6,7 @@ import {
   doc,
   collection,
   serverTimestamp,
+  getDocs
 } from 'firebase/firestore';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
@@ -31,6 +32,8 @@ const EditProduct = ({ product, id }) => {
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
+  const [supplier, setSupplier] = useState([])
+	const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
@@ -44,6 +47,31 @@ const EditProduct = ({ product, id }) => {
 
     return () => unsubscribeAuth();
   }, []);
+
+  useEffect(() => {
+		const getSupplier = async () => {
+			const suppliersRef = collection(
+				db,
+				'users',
+				'qIglLalZbFgIOnO0r3Zu',
+				'basic_users',
+				userId,
+				'suppliers'
+			);
+
+			try {
+				const querySnapshot = await getDocs(suppliersRef);
+				const supplierData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+				setSupplier(supplierData);
+			} catch (err) {
+				console.log(err);
+			}
+		};
+
+		if (userId) {
+			getSupplier();
+		}
+	}, [userId]);
 
 
 
@@ -256,6 +284,30 @@ const EditProduct = ({ product, id }) => {
                       />
                     </div>
                   </div>
+                  <div className="mb-3">
+									<label htmlFor="supplier" className="form-label">Supplier</label>
+									{supplier.length > 0 ? (
+										<select
+											id="supplier"
+											className="form-select"
+											value={selectedSupplier ? selectedSupplier.id : ''}
+											onChange={(e) => {
+												const supplierId = e.target.value;
+												const supplierObj = supplier.find((supplierItem) => supplierItem.id === supplierId);
+												setSelectedSupplier(supplierObj);
+											}}
+										>
+											<option value="">Select Supplier</option>
+											{supplier.map((supplierItem) => (
+												<option key={supplierItem.id} value={supplierItem.id}>
+													{supplierItem.supplierName}
+												</option>
+											))}
+										</select>
+									) : (
+										<p>Loading suppliers...</p>
+									)}
+								</div>
                 </div>
                 <div className='col-md-3'>
                   <div class='mb-3'>
