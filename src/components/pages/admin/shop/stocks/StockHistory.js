@@ -125,10 +125,13 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
 
   return (
     <Modal show={show} onHide={onClose} size="lg" ref={modalRef}>
-      <Modal.Header closeButton>
+      {/* <Modal.Header closeButton>
         <Modal.Title>Stock Card for {product.productTitle}</Modal.Title>
-      </Modal.Header>
+      </Modal.Header> */}
       <Modal.Body id="modalContent">
+      <h4>
+          <strong>Stock Card for {product.productTitle}</strong>
+        </h4>
         <div>
           <strong>Product Name:</strong> {productTitle}
         </div>
