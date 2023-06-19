@@ -193,7 +193,7 @@ const Dashboard = () => {
                       </Dropdown.Toggle>
                       <Dropdown.Menu>
                         <Dropdown.Item onClick={() => handleShowHistoryModal(product)}>
-                          Stock History
+                          Stock Card
                         </Dropdown.Item>
                         <Dropdown.Item onClick={() => handleStockInModal(product)}>
                           Stock In

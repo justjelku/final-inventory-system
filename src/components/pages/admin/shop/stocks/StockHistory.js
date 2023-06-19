@@ -116,42 +116,13 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
     html2pdf().from(modalContent).save('stockcard.pdf');
   };
   
-  const handlePrintAsPdf = () => {
-    if (modalRef.current) {
-      const printWindow = window.open('', '_blank');
-      const modalContent = document.getElementById('modalContent');
-      // const modalContent = modalRef.current.innerHTML;
-      const htmlContent = `
-        <html>
-          <head>
-            <title>Product History</title>
-            <style>
-              /* Add custom styles for the PDF print */
-              /* Example styles: */
-              @page {
-                size: landscape;
-              }
-              h6 { font-weight: bold; }
-              .row { margin-bottom: 10px; }
-            </style>
-          </head>
-          <body>
-            ${modalContent}
-          </body>
-        </html>
-      `;
-      printWindow.document.open();
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      printWindow.print();
-    }
-  };
+ 
   
 
   return (
     <Modal show={show} onHide={onClose} size="lg" ref={modalRef}>
       <Modal.Header closeButton>
-        <Modal.Title>Stock History for {product.productTitle}</Modal.Title>
+        <Modal.Title>Stock Card for {product.productTitle}</Modal.Title>
       </Modal.Header>
       <Modal.Body id="modalContent">
         <div>
@@ -161,13 +132,16 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
           <strong>Product ID:</strong> {productId}
         </div>
         <p>
-          <strong>Current Quantity:</strong> {quantity} pairs
+          <strong>Current Stocks:</strong> {quantity} pairs
         </p>
 
         <div></div>
         <div className="row">
           <div className="col">
-            <h6>Date</h6>
+            <h6>Date Started</h6>
+          </div>
+          <div className="col">
+            <h6>Date Ended</h6>
           </div>
           <div className="col">
             <h6>Supplier</h6>
@@ -185,6 +159,7 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
         {productHistory.map((historyItem) => (
           <div className="row" key={historyItem.id}>
             <div className="col">{historyItem.createdtime?.toDate().toLocaleDateString()}</div>
+            <div className="col">{historyItem.updatedtime?.toDate().toLocaleDateString()}</div>
             <div className="col">{historyItem.supplier}</div>
             <div className="col">{historyItem.productQuantity} pairs</div>
             <div className="col">{historyItem.branch}</div>

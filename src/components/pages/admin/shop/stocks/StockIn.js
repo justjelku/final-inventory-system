@@ -189,7 +189,7 @@ const StockIn = ({ show, product, onClose }) => {
         productPrice: price,
         supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         createdtime: serverTimestamp(),
-        updatedtime: serverTimestamp()
+        // updatedtime: serverTimestamp()
       };
 
       const productData = {
