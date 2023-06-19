@@ -168,7 +168,7 @@ const EditProduct = ({ product, id }) => {
         className="btn btn-outline-primary"
         data-bs-toggle="modal"
         data-bs-target={`#id${id}`}>
-        Edit Product
+        Edit
       </button>
 
       <div
