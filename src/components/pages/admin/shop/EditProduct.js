@@ -33,8 +33,10 @@ const EditProduct = ({ product, id }) => {
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
   const [supplier, setSupplier] = useState([])
+  const [branch, setBranch] = useState([])
 	const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [selectedBranch, setSelectedBranch] = useState(null);
 
   useEffect(() => {
     const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
@@ -70,6 +72,31 @@ const EditProduct = ({ product, id }) => {
 
 		if (userId) {
 			getSupplier();
+		}
+	}, [userId]);
+
+  useEffect(() => {
+		const getBranch = async () => {
+			const branchRef = collection(
+				db,
+				'users',
+				'qIglLalZbFgIOnO0r3Zu',
+				'basic_users',
+				userId,
+				'branch'
+			);
+
+			try {
+				const querySnapshot = await getDocs(branchRef);
+				const branchData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+				setBranch(branchData);
+			} catch (err) {
+				console.log(err);
+			}
+		};
+
+		if (userId) {
+			getBranch();
 		}
 	}, [userId]);
 
@@ -128,10 +155,11 @@ const EditProduct = ({ product, id }) => {
         productSize: parseInt(size),
         productQuantity: parseInt(quantity),
         color,
-        branch,
+        branch: selectedBranch ? selectedBranch.branchName : '',
         category,
         productBrand: brand,
         sizeSystem,
+        supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         productDetails: details,
         productPrice: price,
         updatedtime: serverTimestamp(),
@@ -331,15 +359,29 @@ const EditProduct = ({ product, id }) => {
                     />
                   </div>
                   <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Branch</label>
-                    <input
-                      type="text"
-                      value={branch}
-                      onChange={(e) => setBranch(e.target.value)}
-                      className="form-control"
-                      placeholder="Ex. CDO Branch"
-                    />
-                  </div>
+									<label htmlFor="branch" className="form-label">Branch</label>
+									{branch.length > 0 ? (
+										<select
+											id="branch"
+											className="form-select"
+											value={selectedBranch ? selectedBranch.id : ''}
+											onChange={(e) => {
+												const branchId = e.target.value;
+												const branchObj = branch.find((branchItem) => branchItem.id === branchId);
+												setSelectedBranch(branchObj);
+											}}
+										>
+											<option value="">Select Branch</option>
+											{branch.map((branchItem) => (
+												<option key={branchItem.id} value={branchItem.id}>
+													{branchItem.branchName}
+												</option>
+											))}
+										</select>
+									) : (
+										<p>Loading branches...</p>
+									)}
+								</div>
 
                 </div>
                 <div className='col-md-3'>
