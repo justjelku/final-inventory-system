@@ -132,7 +132,7 @@ const Product = () => {
         <i className="bi bi-pencil-square"></i> Edit
       </button>
     </EditProduct>
-    <div className="ms-2">
+    <div className="ms-auto">
       <button
         type="button"
         className="btn btn-outline-danger"
