@@ -82,7 +82,7 @@ const Sidebarss = () => {
 			<CDBSidebar textColor="#fff" backgroundColor="#333" className={sidebarMinimized ? 'sidebar-minimized' : ''}>
 				<CDBSidebarHeader prefix={<i className="fa fa-bars fa-large"></i>}>
 					<a href="/superadmin/home" className="text-decoration-none" style={{ color: 'inherit' }}>
-						Shoe Inventory SuperAdmin
+						Super Admin Panel
 					</a>
 				</CDBSidebarHeader>
 
