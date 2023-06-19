@@ -74,7 +74,7 @@ const Admin = () => {
 
   return (
     <>
-    <h2 className='mt-3'>Manage Users</h2>
+      <h2 className='mt-3'>Manage Users</h2>
       <div>
         <button
           data-bs-toggle="modal"
@@ -98,6 +98,9 @@ const Admin = () => {
                   Role
                 </th>
                 <th scope="col" className="text-center">
+                  Status
+                </th>
+                <th scope="col" className="text-center">
                   Actions
                 </th>
               </tr>
@@ -108,6 +111,9 @@ const Admin = () => {
                   <td className="text-center justify-content-center">{admins.email}</td>
                   <td className="text-center justify-content-center">{admins.username}</td>
                   <td className="text-center justify-content-center">{admins.role}</td>
+                  <td className="text-center justify-content-center">
+                    {admins.enabled === 'true' ? "Active" : "Disabled"}
+                  </td>
                   <td>
                     <div className="d-flex justify-content-center">
                       <Dropdown>
