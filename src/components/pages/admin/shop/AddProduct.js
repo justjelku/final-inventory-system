@@ -13,6 +13,7 @@ const AddProduct = () => {
 	const [quantity, setQuantity] = useState('');
 	const [color, setColor] = useState('');
 	const [category, setCategory] = useState('');
+	const [brand, setBrand] = useState('');
 	const [sizeSystem, setSizeSystem] = useState('');
 	const [details, setDetails] = useState('');
 	const [price, setPrice] = useState('');

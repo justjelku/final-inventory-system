@@ -33,7 +33,7 @@ const EditProduct = ({ product, id }) => {
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
   const [supplier, setSupplier] = useState([])
-  const [branch, setBranch] = useState([])
+  // const [branch, setBranch] = useState([])
 	const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [userId, setUserId] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
