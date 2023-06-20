@@ -315,7 +315,7 @@ const [userId, setUserId] = useState(null);
                   <div className="d-flex align-items-center">
                     <BsGraphUp className="fs-5 me-3 text-primary" />
                     <div>
-                      <h5 className="card-title">Total Quantities</h5>
+                      <h5 className="card-title">Total Stocks</h5>
                       <p className="card-text">{totalStockInQuantity+totalStockOutQuantity+productIn}</p>
                     </div>
                   </div>
@@ -354,7 +354,7 @@ const [userId, setUserId] = useState(null);
                   <div className="d-flex align-items-center">
                     <BsCart className="fs-2 me-3 text-primary" />
                     <div>
-                      <h5 className="card-title">Product In</h5>
+                      <h5 className="card-title">Stocks</h5>
                       <p className="card-text">{productIn}</p>
                     </div>
                   </div>

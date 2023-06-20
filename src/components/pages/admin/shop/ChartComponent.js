@@ -111,7 +111,11 @@ const ChartComponent = () => {
           }]
         },
         legend: {
-          display: false
+          display: true,
+    labels: {
+      text: 'Stocks',
+      fontSize: 16
+    }
         }
       }
     });

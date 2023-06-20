@@ -22,7 +22,7 @@ const EditProduct = ({ product, id }) => {
   const [qrcodeUrl, setQrcodeUrl] = useState(product.qrcodeUrl);
   const [quantity, setQuantity] = useState(product.productQuantity);
   const [color, setColor] = useState(product.color);
-  const [branch, setBranch] = useState(product.branch);
+  // const [branch, setBranch] = useState(product.branch);
   const [category, setCategory] = useState(product.category);
   const [brand, setBrand] = useState(product.productBrand);
   const [sizeSystem, setSizeSystem] = useState(product.sizeSystem);
@@ -32,8 +32,8 @@ const EditProduct = ({ product, id }) => {
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
-  const [supplier, setSupplier] = useState([])
-  // const [branch, setBranch] = useState([])
+  const [supplier, setSupplier] = useState([]);
+  const [branch, setBranch] = useState([]);
 	const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [userId, setUserId] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
@@ -211,7 +211,7 @@ const EditProduct = ({ product, id }) => {
               <h5
                 className="modal-title"
                 id="editLabel">
-                Update Product Details
+                Update Stock Details
               </h5>
               <button
                 type="button"

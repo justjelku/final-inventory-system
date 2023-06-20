@@ -13,6 +13,11 @@ import ManageUserTabContent from './contents/ManageUser';
 const AdminRootPage = () => {
   const [isMobileView, setIsMobileView] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [sidebarMinimized, setSidebarMinimized] = useState(false);
+
+  const handleSidebarToggle = () => {
+    setSidebarMinimized(!sidebarMinimized);
+  };
 
   useEffect(() => {
     // Function to check if the current view is mobile

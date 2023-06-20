@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ChartComponent from './ChartComponent'
+import ChartComponent from './ChartComponent';
 import { db } from '../../../../firebase';
 import { collection, getDocs, doc, deleteDoc, query, onSnapshot } from 'firebase/firestore';
 import StockOut from './stocks/StockOut';
@@ -11,7 +11,7 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import Barcode from 'react-barcode';
 
-const Dashboard = () => {
+const Dashboard = ({ sidebarMinimized }) => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('');
@@ -62,7 +62,6 @@ const Dashboard = () => {
     setShowStockOutModal(false);
   };
 
-
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -92,27 +91,27 @@ const Dashboard = () => {
 
   const sortedProducts = sortField
     ? [...filteredProducts].sort((a, b) => {
-      const sortResult = a[sortField].localeCompare(b[sortField]);
-      return sortDirection === 'asc' ? sortResult : -sortResult;
-    })
+        const sortResult = a[sortField].localeCompare(b[sortField]);
+        return sortDirection === 'asc' ? sortResult : -sortResult;
+      })
     : filteredProducts;
-    
-    useEffect(() => {
-      if (userId) {
-        const unsubscribe = onSnapshot(
-          query(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products')),
-          (querySnapshot) => {
-            let productData = [];
-            querySnapshot.forEach((doc) => {
-              productData.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
-            });
-            setProducts(productData); // Assuming there is only one user document
-          }
-        );
-  
-        return () => unsubscribe();
-      }
-    }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      const unsubscribe = onSnapshot(
+        query(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products')),
+        (querySnapshot) => {
+          let productData = [];
+          querySnapshot.forEach((doc) => {
+            productData.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
+          });
+          setProducts(productData); // Assuming there is only one user document
+        }
+      );
+
+      return () => unsubscribe();
+    }
+  }, [userId]);
 
   const deleteProduct = async (id) => {
     await deleteDoc(doc(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products', id));
@@ -137,7 +136,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div>
+    <div className={sidebarMinimized ? 'dashboard-content-minimized' : 'dashboard-content'}>
       <ChartComponent />
       <div className="table-responsive">
         <input
@@ -149,42 +148,79 @@ const Dashboard = () => {
           placeholder="Search by product title"
         />
         <table className="table table-striped table-hover table-responsive">
-          <thead className='ms-auto'>
+          <thead className="ms-auto">
             <tr>
-              <th scope="col" className="text-center">Image</th>
-              <th scope="col" className="text-center" onClick={() => handleSort('productTitle')}>
+              <th scope="col" className="text-center">
+                Image
+              </th>
+              <th
+                scope="col"
+                className="text-center"
+                onClick={() => handleSort('productTitle')}
+              >
                 Product{' '}
                 {sortField === 'productTitle' && (
                   <i className={`bi bi-chevron-${sortDirection === 'asc' ? 'up' : 'down'}`} />
                 )}
               </th>
-              <th scope="col" className="text-center">Category</th>
-              <th scope="col" className="text-center">Color</th>
-              <th scope="col" className="text-center">Price</th>
-              <th scope="col" className="text-center">Quantity</th>
-              <th scope="col" className="text-center">Size</th>
-              <th scope="col" className="text-center">Brand</th>
-              <th scope="col" className="text-center">Branch</th>
-              <th scope="col" className="text-center">Barcode</th>
-              <th scope="col" className="text-center">Actions</th>
+              <th scope="col" className="text-center">
+                Category
+              </th>
+              <th scope="col" className="text-center">
+                Color
+              </th>
+              <th scope="col" className="text-center">
+                Price
+              </th>
+              <th scope="col" className="text-center">
+                Quantity
+              </th>
+              <th scope="col" className="text-center">
+                Size
+              </th>
+              <th scope="col" className="text-center">
+                Brand
+              </th>
+              <th scope="col" className="text-center">
+                Branch
+              </th>
+              <th scope="col" className="text-center">
+                Barcode
+              </th>
+              <th scope="col" className="text-center">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
             {sortedProducts.map((product) => (
-              <tr key={product.id} className={selectedRows.includes(product.id) ? 'selected' : ''} onClick={() => handleRowSelect(product.id)}>
+              <tr
+                key={product.id}
+                className={selectedRows.includes(product.id) ? 'selected' : ''}
+                onClick={() => handleRowSelect(product.id)}
+              >
                 <td>
-                  <img src={product.productImage} alt={product.productTitle} style={{ width: '50px', height: '50px' }} />
+                  <img
+                    src={product.productImage}
+                    alt={product.productTitle}
+                    style={{ width: '50px', height: '50px' }}
+                  />
                 </td>
                 <td className="text-center justify-content-center">{product.productTitle}</td>
                 <td className="text-center justify-content-center">{product.category}</td>
                 <td className="text-center justify-content-center">{product.color}</td>
                 <td className="text-center justify-content-center">{product.productPrice}</td>
-                <td className="text-center justify-content-center">{product.productQuantity} Pairs</td>
-                <td className="text-center justify-content-center">{product.sizeSystem} {product.productSize}</td>
+                <td className="text-center justify-content-center">
+                  {product.productQuantity} Pairs
+                </td>
+                <td className="text-center justify-content-center">
+                  {product.sizeSystem} {product.productSize}
+                </td>
                 <td className="text-center justify-content-center">{product.productBrand}</td>
                 <td className="text-center justify-content-center">{product.branch}</td>
-                <td className="text-center justify-content-center"><Barcode value={product.barcodeId} width={1.2} height={50} />
-</td>
+                <td className="text-center justify-content-center">
+                  <Barcode value={product.barcodeId} width={1.2} height={50} />
+                </td>
                 <td>
                   <div className="d-flex justify-content-center">
                     <Dropdown>
@@ -203,7 +239,6 @@ const Dashboard = () => {
                         </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
-
                   </div>
                 </td>
               </tr>

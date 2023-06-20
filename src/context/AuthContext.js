@@ -47,7 +47,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const auth = getAuth();
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const authToken = await userCredential.user.getIdToken(); // Get the authentication token
+      // const authToken = await auth.getIdToken(userCredential.user); // Get the authentication token
+      // localStorage.setItem('authToken', authToken);
       const userDoc = await db
         .collection('users')
         .doc('qIglLalZbFgIOnO0r3Zu')
@@ -99,7 +100,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const auth = getAuth();
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const authToken = await userCredential.user.getIdToken(); // Get the authentication token
+      // const authToken = await auth.getIdToken(userCredential.user); // Get the authentication token
+      // localStorage.setItem('authToken', authToken);
       const userDoc = await db
         .collection('users')
         .doc('qIglLalZbFgIOnO0r3Zu')
@@ -126,7 +128,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const auth = getAuth();
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const authToken = await userCredential.user.getIdToken(); // Get the authentication token
       return userCredential;
     } catch (error) {
       throw new Error(error.message);
@@ -229,7 +230,7 @@ export const AuthProvider = ({ children }) => {
         setUser({
           uid: user.uid,
           email: user.email,
-          role: 'basic'
+          role: 'admin'
         });
       } else {
         setUser(null);
@@ -244,6 +245,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
+      // const authToken = localStorage.getItem('authToken');
       if (user) {
         user.getIdToken().then((authToken) => {
           localStorage.setItem('authToken', authToken); // Store the authentication token
@@ -255,6 +257,46 @@ export const AuthProvider = ({ children }) => {
 
     return unsubscribe;
   }, []);
+
+  // useEffect(() => {
+  //   const authToken = localStorage.getItem('authToken');
+  
+  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       setUser({
+  //         uid: user.uid,
+  //         email: user.email,
+  //         role: 'admin',
+  //       });
+  
+  //       // Redirect to homepage if user is already logged in
+  //       if (window.location.pathname === '/signin') {
+  //         window.location.href = '/';
+  //       }
+  //     } else {
+  //       setUser(null);
+  //     }
+  //     setLoading(false); // Set loading to false once the authentication state is determined
+  //   });
+  
+  //   // Store the authentication token in local storage
+  //   if (authToken) {
+  //     auth.currentUser
+  //       .getIdToken()
+  //       .then((newAuthToken) => {
+  //         localStorage.setItem('authToken', newAuthToken); // Store the updated authentication token
+  //       })
+  //       .catch((error) => {
+  //         console.error(error);
+  //         localStorage.removeItem('authToken'); // Remove the authentication token on error
+  //       });
+  //   } else {
+  //     localStorage.removeItem('authToken'); // Remove the authentication token if it doesn't exist
+  //   }
+  
+  //   return () => unsubscribe();
+  // }, []);
+  
 
   return (
     <AuthContext.Provider value={{ user, signIn, createUser, logout, signInAdmin, updateProfile, signInWithEmailAndPassword, signInWithGoogle }}>
