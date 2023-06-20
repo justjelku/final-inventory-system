@@ -204,6 +204,7 @@ const StockIn = ({ show, product, onClose }) => {
         color,
         branch: selectedBranch ? selectedBranch.branchName : '',
         category,
+        supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         productBrand: brand,
         sizeSystem,
         productDetails: details,
