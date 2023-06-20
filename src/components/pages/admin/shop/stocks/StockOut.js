@@ -156,7 +156,12 @@ const StockOut = ({ product, show, onClose }) => {
       const stocksRef = doc(productRef, 'stock_history', stockoutId);
       const stockhistoryRef = doc(stockRef, stockoutId);
       const stockOutData = {
+        stockoutId, stockoutId,
         productId: productId,
+        userId: userId,
+        barcodeId,
+        barcodeUrl,
+        qrcodeUrl,
         productTitle,
         productSize: parseInt(size),
         productQuantity: parseInt(quantity),
@@ -174,13 +179,18 @@ const StockOut = ({ product, show, onClose }) => {
       };
 
       const productData = {
-        productId: productId,
+        userId,
+        productId,
+        barcodeId,
+        barcodeUrl,
+        qrcodeUrl,
         productTitle,
         productSize: parseInt(size),
-        productQuantity: parseInt(product.productQuantity) - parseInt(quantity),
+        productQuantity: parseInt(quantity) + parseInt(product.productQuantity),
         color,
-        branch,
+        branch: selectedBranch ? selectedBranch.branchName : '',
         category,
+        supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         productBrand: brand,
         sizeSystem,
         productDetails: details,
