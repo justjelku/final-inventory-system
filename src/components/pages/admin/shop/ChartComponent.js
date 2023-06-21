@@ -85,7 +85,7 @@ const ChartComponent = () => {
         if (product.createdtime) {
           const updatedTime = product.createdtime.toDate();
           const dayIndex = updatedTime.getDay();
-          const productQuantity = product.productQuantity;
+          const productQuantity = product.balance;
           quantitiesByDay[dayIndex] += productQuantity;
         }
       });
@@ -96,6 +96,7 @@ const ChartComponent = () => {
       data: {
         labels: daysOfWeek,
         datasets: [{
+          label: "Stocks per day",
           data: quantitiesByDay,
           lineTension: 0,
           backgroundColor: 'transparent',
@@ -114,10 +115,7 @@ const ChartComponent = () => {
         },
         legend: {
           display: true,
-    labels: {
-      text: 'Stocks',
-      fontSize: 16
-    }
+          label: "Stocks",
         }
       }
     });

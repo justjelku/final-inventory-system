@@ -80,7 +80,8 @@ const Sidebarss = () => {
 	return (
 		<div style={{ display: 'flex', height: '100vh', overflow: 'scroll initial' }}>
 			<CDBSidebar textColor="#fff" backgroundColor="#333" className={sidebarMinimized ? 'sidebar-minimized' : ''}>
-				<CDBSidebarHeader prefix={<i className="fa fa-bars fa-large"></i>}>
+			{/* <CDBSidebarHeader prefix={<i className="fa fa-bars fa-large"></i>}> */}
+				<CDBSidebarHeader>
 					<a href="/" className="text-decoration-none" style={{ color: 'inherit' }}>
 						Shoe Inventory
 					</a>
