@@ -146,6 +146,12 @@ const StockIn = ({ show, product, onClose }) => {
       //   return;
       // }
 
+      if ((parseInt(product.balance) + parseInt(quantity)) > 100) {
+        alert('Warning! Overstock! Current Stock: ' + product.balance);
+        setLoading(false);
+        return;
+      }
+
       await setDoc(productRef, productData);
       await setDoc(docRef, stockInData);
       await setDoc(stocksRef, stockInData);

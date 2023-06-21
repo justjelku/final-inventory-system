@@ -142,6 +142,8 @@ const Dashboard = ({ sidebarMinimized }) => {
     link.click();
   };
 
+  const totalQuantity = products.reduce((total, product) => total + product.balance, 0);
+
   return (
     <div className={sidebarMinimized ? 'dashboard-content-minimized' : 'dashboard-content'}>
       <ChartComponent />
@@ -251,6 +253,18 @@ const Dashboard = ({ sidebarMinimized }) => {
               </tr>
             ))}
           </tbody>
+          <tfoot>
+          <tr>
+            <td colSpan="5"></td>
+            <td className="text-center justify-content-center">
+              <strong>Total Quantity:</strong>
+            </td>
+            <td className="text-center justify-content-center">
+              <strong>{totalQuantity} Pairs</strong>
+            </td>
+            <td colSpan="4"></td>
+          </tr>
+        </tfoot>
         </table>
         {selectedProduct && (
           <ProductHistoryModal

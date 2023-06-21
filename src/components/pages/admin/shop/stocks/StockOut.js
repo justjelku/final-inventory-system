@@ -141,10 +141,11 @@ const StockOut = ({ product, show, onClose }) => {
       //   productData.productImage = downloadURL;
       // }
 
-      // if (!selectedSupplier || !selectedSupplier.supplierName) {
-      //   alert('Please select a supplier');
-      //   return;
-      // }
+      if ((parseInt(product.balance) - parseInt(quantity)) < 0) {
+        alert('Warning! Understock! Current Stock: ' + product.balance);
+        setLoading(false);
+        return;
+      }
 
       await setDoc(productRef, productData);
       await setDoc(docRef, stockOutData);

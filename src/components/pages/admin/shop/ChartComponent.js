@@ -21,6 +21,7 @@ const ChartComponent = () => {
   const [products, setProducts] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [totalStocks, setTotalStocks] = useState(0);
 
 	useEffect(() => {
 		const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
@@ -33,6 +34,27 @@ const ChartComponent = () => {
 
 		return () => unsubscribeAuth();
 	}, []);
+
+  useEffect(() => {
+    if (userId) {
+      const unsubscribe = onSnapshot(
+        query(collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users', userId, 'products')),
+        (querySnapshot) => {
+          let productData = [];
+          let totalStocks = 0; // Initialize totalStocks
+          querySnapshot.forEach((doc) => {
+            const product = { id: doc.id, ...doc.data() };
+            productData.push(product);
+            totalStocks += product.balance; // Accumulate the stock quantity
+          });
+          setProducts(productData);
+          setTotalStocks(totalStocks); // Update totalStocks state
+        }
+      );
+
+      return () => unsubscribe();
+    }
+  }, [userId]);
 
   useEffect(() => {
 		if (userId) {
@@ -96,7 +118,7 @@ const ChartComponent = () => {
       data: {
         labels: daysOfWeek,
         datasets: [{
-          label: "Stocks per day",
+          label: ('Total Stocks '+ totalStocks),
           data: quantitiesByDay,
           lineTension: 0,
           backgroundColor: 'transparent',
@@ -115,7 +137,10 @@ const ChartComponent = () => {
         },
         legend: {
           display: true,
-          label: "Stocks",
+    labels: {
+      text: 'Stocks',
+      fontSize: 16
+    }
         }
       }
     });
