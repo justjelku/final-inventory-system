@@ -165,7 +165,7 @@ const EditProduct = ({ product, id }) => {
       await updateDoc(docRef, productData);
       await setDoc(stckRef, stockData);
       setLoading(false);
-      window.location.reload();
+      // window.location.reload();
     } catch (err) {
       setLoading(false);
       console.log(err);

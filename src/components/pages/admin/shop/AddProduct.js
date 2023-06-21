@@ -165,6 +165,8 @@ const AddProduct = () => {
 				userId,
 				'products'
 			  );
+
+			  const parentId = userId
 	  
 			  const stockRef = collection(
 				db,
@@ -176,8 +178,17 @@ const AddProduct = () => {
 				productId,
 				'stock_history'
 			  );
+			  const globalRef = collection(
+				db,
+				'users',
+				'qIglLalZbFgIOnO0r3Zu',
+				'products',
+				parentId,
+				'stocks',
+			  );
 			  const docRef = doc(collectionRef, productId);
 			  const stckRef = doc(stockRef, productId);
+			  const glbRef = doc(globalRef, productId);
 			  const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 	  
 			  await setDoc(docRef, {

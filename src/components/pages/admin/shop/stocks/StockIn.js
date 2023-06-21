@@ -54,6 +54,7 @@ const StockIn = ({ show, product, onClose }) => {
 
   const updateProduct = async () => {
     try {
+      setLoading(true);
       const lastProductId = getLastProductId();
       const stockinId = `2023${userId.substring(0, 6)}${lastProductId.substring(lastProductId.length - 8)}`;
 
@@ -149,9 +150,12 @@ const StockIn = ({ show, product, onClose }) => {
       await setDoc(docRef, stockInData);
       await setDoc(stocksRef, stockInData);
       await setDoc(stockhistoryRef, stockInData);
-      window.location.reload();
+      setLoading(false);
+      onClose(); // Close the modal
+      // window.location.reload();
     } catch (err) {
       console.log(err);
+      setLoading(false);
     }
   };
 
@@ -392,6 +396,7 @@ const StockIn = ({ show, product, onClose }) => {
                 placeholder="Product details"
                 id="exampleFormControlTextarea1"
                 rows="3"
+                readOnly
               >
               </textarea>
             </div>

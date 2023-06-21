@@ -2,12 +2,11 @@ import { db } from '../../../../firebase'
 import { storage } from '../../../../firebase'
 import React, { useState, useEffect } from 'react';
 import {
-  updateDoc,
   doc,
   collection,
   serverTimestamp,
-  getDocs,
-  setDoc
+  setDoc,
+  updateDoc
 } from 'firebase/firestore';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
@@ -16,15 +15,15 @@ import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 
 const EditProduct = ({ product, id }) => {
   const [productTitle, setProductTitle] = useState(product.productTitle);
-  const [productId, setProductId] = useState(product.productId);
+  const [productId] = useState(product.productId);
   const [size, setSize] = useState(product.productSize);
-  const [barcodeId, setBarcodeId] = useState(product.barcodeId);
-  const [barcodeUrl, setBarcodeUrl] = useState(product.barcodeUrl);
-  const [qrcodeUrl, setQrcodeUrl] = useState(product.qrcodeUrl);
+  const [barcodeId] = useState(product.barcodeId);
+  const [barcodeUrl] = useState(product.barcodeUrl);
+  const [qrcodeUrl] = useState(product.qrcodeUrl);
+  const [stockinId] = useState(product.stockinId);
   const [quantity, setQuantity] = useState(product.productQuantity);
   const [color, setColor] = useState(product.color);
   const [type, setType] = useState(product.type);
-  // const [branch, setBranch] = useState(product.branch);
   const [category, setCategory] = useState(product.category);
   const [brand, setBrand] = useState(product.productBrand);
   const [sizeSystem, setSizeSystem] = useState(product.sizeSystem);
@@ -33,10 +32,12 @@ const EditProduct = ({ product, id }) => {
   const [image, setImage] = useState(product.productImage);
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [currency, setCurrency] = useState('₱');
+  const [setCurrency] = useState('₱');
   const [supplier, setSupplier] = useState(product.supplier);
   const [branch, setBranch] = useState(product.branch);
   const [userId, setUserId] = useState(null);
+  // const [selectedBranch, setSelectedBranch] = useState(null);
+  // const [selectedSupplier, setSelectedSupplier] = useState(null);
 
   useEffect(() => {
     const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
@@ -56,7 +57,7 @@ const EditProduct = ({ product, id }) => {
       if (image && typeof image !== 'string') {
         const storageRef = ref(storage, `products/productImage/${image.name}`);
         const uploadTask = uploadBytesResumable(storageRef, image);
-
+  
         uploadTask.on(
           'state_changed',
           (snapshot) => {
@@ -81,7 +82,7 @@ const EditProduct = ({ product, id }) => {
       console.log(err);
     }
   };
-
+  
   const updateProductData = async (downloadURL) => {
     try {
       const collectionRef = collection(
@@ -90,40 +91,87 @@ const EditProduct = ({ product, id }) => {
         'qIglLalZbFgIOnO0r3Zu',
         'basic_users',
         userId,
-        'products',
+        'products'
       );
+  
+      const stockRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
+        userId,
+        'products',
+        productId,
+        'stock_history'
+      );
+  
       const docRef = doc(collectionRef, productId);
-
+      const stckRef = doc(stockRef, productId);
+  
       const productData = {
+        userId: userId,
+        stockinId,
         productId,
         barcodeId,
         barcodeUrl,
         qrcodeUrl,
-        productTitle,
-        productSize: parseInt(size),
-        productQuantity: parseInt(quantity),
-        color,
-        branch: branch,
-        category,
+        productTitle: productTitle,
+        productPrice: parseInt(price),
+        color: color,
+        category: category,
         productBrand: brand,
-        sizeSystem,
+        type: type,
         supplier: supplier,
+        branch: branch,
+        productSize: size,
+        sizeSystem: sizeSystem,
+        productQuantity: parseInt(quantity),
+        balance: parseInt(quantity),
         productDetails: details,
-        productPrice: price,
-        productImage: downloadURL,
+        createdtime: serverTimestamp(),
         updatedtime: serverTimestamp(),
       };
-
+  
+      const stockData = {
+        userId: userId,
+        stockinId: stockinId,
+        productId: productId,
+        barcodeId: barcodeId,
+        barcodeUrl: '',
+        stock: 'Stock In',
+        qrcodeUrl: '',
+        productTitle: productTitle,
+        productPrice: parseInt(price) * parseInt(quantity),
+        color: color,
+        category: category,
+        productBrand: brand,
+        type: type,
+        supplier: supplier,
+        branch: branch,
+        productSize: size,
+        sizeSystem: sizeSystem,
+        productQuantity: parseInt(quantity),
+        balance: parseInt(quantity),
+        productDetails: details,
+        createdtime: serverTimestamp(),
+        updatedtime: serverTimestamp(),
+      };
+  
       if (downloadURL) {
         productData.productImage = downloadURL;
+        stockData.productImage = downloadURL;
       }
-
-      await setDoc(docRef, productData);
+  
+      await updateDoc(docRef, productData);
+      await setDoc(stckRef, stockData);
+      setLoading(false);
       window.location.reload();
     } catch (err) {
+      setLoading(false);
       console.log(err);
     }
   };
+  
 
   const handlePriceChange = (e) => {
     setPrice(e.target.value);
@@ -220,27 +268,7 @@ const EditProduct = ({ product, id }) => {
                       placeholder="Nike Air Zoom"
                     />
                   </div>
-                  {/* <div class='mb-3'>
-									<label for="formGroupExampleInput" class="form-label">Size System</label>
-									<input
-										type="text"
-										value={sizeSystem}
-										onChange={(e) => setSizeSystem(e.target.value)}
-										className="form-control"
-										placeholder="Ex. UK, US, EU"
-									/>
-								</div>
-								<div class='mb-3'>
-									<label for="formGroupExampleInput" class="form-label">Men Size</label>
-									<input
-										type="number"
-										value={size}
-										onChange={(e) => setSize(e.target.value)}
-										className="form-control"
-										placeholder="Ex. 5.1"
-									/>
-								</div> */}
-                   <div className="mb-3">
+                  <div className="mb-3">
                     <label htmlFor="formGroupExampleInput" className="form-label">Size</label>
                     <div className="input-group mb-1">
                       <input
@@ -322,25 +350,30 @@ const EditProduct = ({ product, id }) => {
                     </div>
                   </div>
                   <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Category</label>
-                    <input
-                      type="text"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="form-control"
-                      placeholder="Basketball Shoes"
-                    />
-                  </div>
+              <label for="formGroupExampleInput" class="form-label">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="form-control"
+                readOnly
+              >
+                <option value="Basketball Shoes">Basketball Shoes</option>
+              </select>
+            </div>
                   <div class='mb-3'>
-                    <label for="formGroupExampleInput" class="form-label">Category</label>
-                    <input
-                      type="text"
-                      value={type}
-                      onChange={(e) => setType(e.target.value)}
-                      className="form-control"
-                      placeholder=""
-                    />
-                  </div>
+              <label for="formGroupExampleInput" class="form-label">Type</label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="form-control"
+                readOnly
+              >
+                <option value="High Top Sneakers">High Top Sneakers</option>
+                <option value="Mid-Top Sneakers">Mid-Top Sneakers</option>
+                <option value="Low Top Sneakers">Low Top Sneakers</option>
+                <option value="Performance Sneakers">Performance Sneakers</option>
+              </select>
+            </div>
 
 
                 </div>

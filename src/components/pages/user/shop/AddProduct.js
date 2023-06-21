@@ -23,10 +23,10 @@ const AddProduct = () => {
 	const [loading, setLoading] = useState(false);
 	const [currency, setCurrency] = useState('₱');
 	const [userId, setUserId] = useState(null);
-	const [branch, setBranch] = useState([])
-	const [supplier, setSupplier] = useState([])
-	const [selectedSupplier, setSelectedSupplier] = useState(null);
-	const [selectedBranch, setSelectedBranch] = useState(null);
+	const [branch, setBranch] = useState('')
+	const [supplier, setSupplier] = useState('')
+	// const [selectedSupplier, setSelectedSupplier] = useState(null);
+	// const [selectedBranch, setSelectedBranch] = useState(null);
 
 	useEffect(() => {
 		const unsubscribeAuth = firebase.auth().onAuthStateChanged((user) => {
@@ -40,56 +40,56 @@ const AddProduct = () => {
 		return () => unsubscribeAuth();
 	}, []);
 
-	useEffect(() => {
-		const getSupplier = async () => {
-			const suppliersRef = collection(
-				db,
-				'users',
-				'qIglLalZbFgIOnO0r3Zu',
-				'basic_users',
-				userId,
-				'suppliers'
-			);
+	// useEffect(() => {
+	// 	const getSupplier = async () => {
+	// 		const suppliersRef = collection(
+	// 			db,
+	// 			'users',
+	// 			'qIglLalZbFgIOnO0r3Zu',
+	// 			'basic_users',
+	// 			userId,
+	// 			'suppliers'
+	// 		);
 
-			try {
-				const querySnapshot = await getDocs(suppliersRef);
-				const supplierData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-				setSupplier(supplierData);
-			} catch (err) {
-				console.log(err);
-			}
-		};
+	// 		try {
+	// 			const querySnapshot = await getDocs(suppliersRef);
+	// 			const supplierData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+	// 			setSupplier(supplierData);
+	// 		} catch (err) {
+	// 			console.log(err);
+	// 		}
+	// 	};
 
-		if (userId) {
-			getSupplier();
-		}
-	}, [userId]);
+	// 	if (userId) {
+	// 		getSupplier();
+	// 	}
+	// }, [userId]);
 
 
-	useEffect(() => {
-		const getBranch = async () => {
-			const branchRef = collection(
-				db,
-				'users',
-				'qIglLalZbFgIOnO0r3Zu',
-				'basic_users',
-				userId,
-				'branch'
-			);
+	// useEffect(() => {
+	// 	const getBranch = async () => {
+	// 		const branchRef = collection(
+	// 			db,
+	// 			'users',
+	// 			'qIglLalZbFgIOnO0r3Zu',
+	// 			'basic_users',
+	// 			userId,
+	// 			'branch'
+	// 		);
 
-			try {
-				const querySnapshot = await getDocs(branchRef);
-				const branchData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-				setBranch(branchData);
-			} catch (err) {
-				console.log(err);
-			}
-		};
+	// 		try {
+	// 			const querySnapshot = await getDocs(branchRef);
+	// 			const branchData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+	// 			setBranch(branchData);
+	// 		} catch (err) {
+	// 			console.log(err);
+	// 		}
+	// 	};
 
-		if (userId) {
-			getBranch();
-		}
-	}, [userId]);
+	// 	if (userId) {
+	// 		getBranch();
+	// 	}
+	// }, [userId]);
 
 	const handlePriceChange = (e) => {
 		setPrice(e.target.value);
@@ -128,119 +128,128 @@ const AddProduct = () => {
 	const submitProduct = async (e) => {
 		e.preventDefault();
 		try {
-			setLoading(true);
-			const lastProductId = getLastProductId();
-			const stockinId = `2023${userId.substring(0, 6)}${lastProductId.substring(lastProductId.length - 8)}`;
-			const barcodeData = `2023${userId.substring(0, 4)}${lastProductId.substring(lastProductId.length - 3)}`;
-			const productId = `2023${userId.substring(0, 5)}${lastProductId.substring(lastProductId.length - 8)}`;
-
-			const storageRef = ref(storage, `products/productImage/${image.name}`);
-			const uploadTask = uploadBytesResumable(storageRef, image);
-
-			uploadTask.on(
-				'state_changed',
-				(snapshot) => {
-					const progress = Math.round(
-						(snapshot.bytesTransferred / snapshot.totalBytes) * 100
-					);
-					setProgresspercent(progress);
-				},
-				(error) => {
-					setLoading(false);
-					alert(error);
-				},
-				async () => {
-					const collectionRef = collection(
-						db,
-						'users',
-						'qIglLalZbFgIOnO0r3Zu',
-						'basic_users',
-						userId,
-						'products',
-					);
-
-					const stockRef = collection(
-						db,
-						'users',
-						'qIglLalZbFgIOnO0r3Zu',
-						'basic_users',
-						userId,
-						'products',
-						productId,
-						'stock_history'
-					);
-					const docRef = doc(collectionRef, productId);
-					const stckRef = doc(stockRef, productId);
-					const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-					await setDoc(docRef, {
-						userId: userId,
-						stockinId: stockinId,
-						productId: productId,
-						barcodeId: barcodeData,
-						barcodeUrl: '',
-						qrcodeUrl: '',
-						productTitle: productTitle,
-						productPrice: combinedValue,
-						color: color,
-						category: category,
-						productBrand: brand,
-						type: type,
-						supplier: selectedSupplier ? selectedSupplier.supplierName : '',
-						branch: selectedBranch ? selectedBranch.branchName : '',
-						productSize: combinedSize,
-						sizeSystem: sizeSystem,
-						productImage: downloadURL,
-						productQuantity: parseInt(quantity),
-						balance: parseInt(quantity),
-						productDetails: details,
-						createdtime: serverTimestamp(),
-						updatedtime: serverTimestamp(),
-					});
-
-					await setDoc(stckRef, {
-						userId: userId,
-						stockinId: stockinId,
-						stock: 'Stock In',
-						productId: productId,
-						barcodeId: barcodeData,
-						barcodeUrl: '',
-						qrcodeUrl: '',
-						productTitle: productTitle,
-						productPrice: parseInt(price)*parseInt(quantity),
-						color: color,
-						category: category,
-						productBrand: brand,
-						type: type,
-						supplier: selectedSupplier ? selectedSupplier.supplierName : '',
-						branch: selectedBranch ? selectedBranch.branchName : '',
-						productSize: combinedSize,
-						sizeSystem: sizeSystem,
-						productImage: downloadURL,
-						productQuantity: parseInt(quantity),
-						balance: parseInt(quantity),
-						productDetails: details,
-						createdtime: serverTimestamp(),
-						updatedtime: serverTimestamp(),
-					});
-
-					setLoading(false);
-					setProductTitle('');
-					setPrice('');
-					setColor('');
-					setBrand('');
-					setBranch('');
-					setSize('');
-					// setSizeSystem('');
-					setQuantity('');
-					setDetails('');
-					// window.location.reload();
-				}
-			);
+		  setLoading(true);
+		  const combinedSize = `${sizeSystem} ${size}`;
+		  const lastProductId = getLastProductId();
+		  const stockinId = `2023${userId.substring(0, 6)}${lastProductId.substring(
+			lastProductId.length - 8
+		  )}`;
+		  const barcodeData = `2023${userId.substring(0, 4)}${lastProductId.substring(
+			lastProductId.length - 3
+		  )}`;
+		  const productId = `2023${userId.substring(0, 5)}${lastProductId.substring(
+			lastProductId.length - 8
+		  )}`;
+	  
+		  const storageRef = ref(storage, `products/productImage/${image.name}`);
+		  const uploadTask = uploadBytesResumable(storageRef, image);
+	  
+		  uploadTask.on(
+			'state_changed',
+			(snapshot) => {
+			  const progress = Math.round(
+				(snapshot.bytesTransferred / snapshot.totalBytes) * 100
+			  );
+			  setProgresspercent(progress);
+			},
+			(error) => {
+			  setLoading(false);
+			  alert(error);
+			},
+			async () => {
+			  const collectionRef = collection(
+				db,
+				'users',
+				'qIglLalZbFgIOnO0r3Zu',
+				'basic_users',
+				userId,
+				'products'
+			  );
+	  
+			  const stockRef = collection(
+				db,
+				'users',
+				'qIglLalZbFgIOnO0r3Zu',
+				'basic_users',
+				userId,
+				'products',
+				productId,
+				'stock_history'
+			  );
+			  const docRef = doc(collectionRef, productId);
+			  const stckRef = doc(stockRef, productId);
+			  const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+	  
+			  await setDoc(docRef, {
+				userId: userId,
+				stockinId: stockinId,
+				productId: productId,
+				barcodeId: barcodeData,
+				barcodeUrl: '',
+				qrcodeUrl: '',
+				productTitle: productTitle,
+				productPrice: parseInt(price),
+				color: color,
+				category: category,
+				productBrand: brand,
+				type: type,
+				supplier: supplier,
+				branch: branch,
+				productSize: combinedSize,
+				sizeSystem: sizeSystem,
+				productImage: downloadURL,
+				productQuantity: parseInt(quantity),
+				balance: parseInt(quantity),
+				productDetails: details,
+				createdtime: serverTimestamp(),
+				updatedtime: serverTimestamp(),
+			  });
+	  
+			  await setDoc(stckRef, {
+				userId: userId,
+				stockinId: stockinId,
+				stock: 'Stock In',
+				productId: productId,
+				barcodeId: barcodeData,
+				barcodeUrl: '',
+				qrcodeUrl: '',
+				productTitle: productTitle,
+				productPrice: parseInt(price) * parseInt(quantity),
+				color: color,
+				category: category,
+				productBrand: brand,
+				type: type,
+				supplier: supplier,
+				branch: branch,
+				productSize: combinedSize,
+				sizeSystem: sizeSystem,
+				productImage: downloadURL,
+				productQuantity: parseInt(quantity),
+				balance: parseInt(quantity),
+				productDetails: details,
+				createdtime: serverTimestamp(),
+				updatedtime: serverTimestamp(),
+			  });
+	  
+			  setLoading(false);
+			  setProductTitle('');
+			  setPrice('');
+			  setColor('');
+			  setBrand('');
+			  setBranch('');
+			  setSize('');
+			  // setSizeSystem('');
+			  setQuantity('');
+			  setDetails('');
+			  // window.location.reload();
+			}
+		  );
 		} catch (err) {
-			setLoading(false);
-			console.log(err);
+		  setLoading(false);
+		  console.log(err);
 		}
-	};
+	  };
+	  
 
 	return (
 		<div
@@ -266,16 +275,6 @@ const AddProduct = () => {
 						</button>
 					</div>
 					<div className="modal-body">
-						{/* <div className="row"> */}
-						{/* <div className="col">
-                {image && (
-                  <div className="mb-3">
-                    <label className="form-label">Current Image:</label>
-                    <img src={URL.createObjectURL(image)} alt="Current Product" className="img-fluid" />
-                  </div>
-                )}
-              </div> */}
-						{/* </div> */}
 						<div className="row">
 							<div className="col-md-3">
 								<div className="mb-3">
@@ -374,7 +373,7 @@ const AddProduct = () => {
 										/>
 									</div>
 								</div> */}
-								<div className="mb-3">
+								{/* <div className="mb-3">
 									<label htmlFor="supplier" className="form-label">Supplier</label>
 									{supplier.length > 0 ? (
 										<select
@@ -397,6 +396,16 @@ const AddProduct = () => {
 									) : (
 										<p>Loading suppliers...</p>
 									)}
+								</div> */}
+								<div class='mb-3'>
+									<label for="formGroupExampleInput" class="form-label">Supplier</label>
+									<input
+										type="text"
+										value={supplier}
+										onChange={(e) => setSupplier(e.target.value)}
+										className="form-control"
+										placeholder=""
+									/>
 								</div>
 							</div>
 							<div className='col-md-3'>
@@ -420,7 +429,7 @@ const AddProduct = () => {
 										placeholder="Ex. Black"
 									/>
 								</div>
-								<div class='mb-3'>
+								{/* <div class='mb-3'>
 									<label htmlFor="branch" className="form-label">Branch</label>
 									{branch.length > 0 ? (
 										<select
@@ -443,6 +452,16 @@ const AddProduct = () => {
 									) : (
 										<p>Loading branches...</p>
 									)}
+								</div> */}
+								<div class='mb-3'>
+									<label for="formGroupExampleInput" class="form-label">Branch</label>
+									<input
+										type="text"
+										value={branch}
+										onChange={(e) => setBranch(e.target.value)}
+										className="form-control"
+										placeholder=""
+									/>
 								</div>
 
 							</div>
@@ -485,6 +504,7 @@ const AddProduct = () => {
 										onChange={(e) => setCategory(e.target.value)}
 										className="form-control"
 									>
+										<option value="">Select Category</option>
 										<option value="Basketball Shoes">Basketball Shoes</option>
 									</select>
 								</div>
@@ -495,6 +515,7 @@ const AddProduct = () => {
 										onChange={(e) => setType(e.target.value)}
 										className="form-control"
 									>
+										<option value="">Select Type</option>
 										<option value="High Top Sneakers">High Top Sneakers</option>
 										<option value="Mid-Top Sneakers">Mid-Top Sneakers</option>
 										<option value="Low Top Sneakers">Low Top Sneakers</option>

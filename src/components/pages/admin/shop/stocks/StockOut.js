@@ -24,7 +24,7 @@ const StockOut = ({ product, show, onClose }) => {
   const [price, setPrice] = useState(product.productPrice);
   const [image, setImage] = useState(product.productImage);
   const [progresspercent, setProgresspercent] = useState(0);
-  const [setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [setCurrency] = useState('₱');
   const [type, setType] = useState(product.type);
   const [branch, setBranch] = useState(product.branch)
@@ -54,6 +54,7 @@ const StockOut = ({ product, show, onClose }) => {
 
   const updateProduct = async () => {
     try {
+      setLoading(true);
       const lastProductId = getLastProductId();
       const stockoutId = `2023${userId.substring(0, 6)}${lastProductId.substring(lastProductId.length - 8)}`;
 
@@ -149,8 +150,11 @@ const StockOut = ({ product, show, onClose }) => {
       await setDoc(docRef, stockOutData);
       await setDoc(stocksRef, stockOutData);
       await setDoc(stockhistoryRef, stockOutData);
-      window.location.reload();
+      setLoading(false);
+      onClose(); // Close the modal
+      // window.location.reload();
     } catch (err) {
+      setLoading(false);  
       console.log(err);
     }
   };
@@ -177,7 +181,7 @@ const StockOut = ({ product, show, onClose }) => {
       <Modal.Body>
         <div className="row">
           <div className="col-md-3">
-            <div className="mb-3">
+            {/* <div className="mb-3">
               <label htmlFor="formFileSm" className="form-label">
                 Select Image
               </label>
@@ -189,7 +193,7 @@ const StockOut = ({ product, show, onClose }) => {
                 onChange={handleImageChange}
                 readOnly
               />
-            </div>
+            </div> */}
             <div className="col">
               {image && typeof image === 'string' ? (
                 <div className="d-flex justify-content-center">
@@ -406,8 +410,11 @@ const StockOut = ({ product, show, onClose }) => {
         <button
           type="button"
           className="btn btn-outline-primary"
-          onClick={e => updateProduct(e)}
-        >Stock Out</button>
+          onClick={updateProduct}
+          disabled={loading}
+        >
+          {loading ? 'Updating...' : 'Stock Out'}
+        </button>
       </Modal.Footer>
     </Modal>
   )

@@ -70,7 +70,7 @@ const Product = () => {
 				type="button"
 				className="btn btn-info m-3"
 			>
-				Add Product
+				Add Stock
 			</button>
 			<div className="container mt-10">
 				<div className="row">
@@ -86,6 +86,9 @@ const Product = () => {
 							color,
 							category,
 							branch,
+							supplier,
+							stockinId,
+							type,
 							productBrand,
 							sizeSystem,
 							productDetails,
@@ -107,42 +110,45 @@ const Product = () => {
 										<p className="card-text">{color}</p>
 									</div>
 									<div className="card-footer">
-  <div className="d-flex justify-content-between">
-    <EditProduct
-      product={{
-        productId,
-        barcodeId,
-        barcodeUrl,
-        qrcodeUrl,
-        productTitle,
-        productSize,
-        productQuantity,
-        color,
-        category,
-        branch,
-        productBrand,
-        sizeSystem,
-        productDetails,
-        productPrice,
-        productImage,
-      }}
-      id={id}
-    >
-      <button type="button" className="btn btn-outline-primary">
-        <i className="bi bi-pencil-square"></i> Edit
-      </button>
-    </EditProduct>
-    <div className="ms-auto">
-      <button
-        type="button"
-        className="btn btn-outline-danger"
-        onClick={() => deleteProduct(id)}
-      >
-        <i className="bi bi-trash"></i> Delete
-      </button>
-    </div>
-  </div>
-</div>
+										<div className="d-flex justify-content-between">
+											<EditProduct
+												product={{
+													productId,
+													barcodeId,
+													barcodeUrl,
+													qrcodeUrl,
+													productTitle,
+													productSize,
+													productQuantity,
+													color,
+													category,
+													branch,
+													supplier,
+													stockinId,
+													type,
+													productBrand,
+													sizeSystem,
+													productDetails,
+													productPrice,
+													productImage,
+												}}
+												id={id}
+											>
+												<button type="button" className="btn btn-outline-primary">
+													<i className="bi bi-pencil-square"></i> Edit
+												</button>
+											</EditProduct>
+											<div className="ms-auto">
+												<button
+													type="button"
+													className="btn btn-outline-danger"
+													onClick={() => deleteProduct(id)}
+												>
+													<i className="bi bi-trash"></i> Delete
+												</button>
+											</div>
+										</div>
+									</div>
 
 								</div>
 							</div>

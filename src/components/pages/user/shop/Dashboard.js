@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import ChartComponent from './ChartComponent';
 import { db } from '../../../../firebase';
-import { collection, getDocs, doc, deleteDoc, query, onSnapshot } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  doc,
+  deleteDoc,
+  query,
+  onSnapshot
+} from 'firebase/firestore';
 import StockOut from './stocks/StockOut';
 import StockIn from './stocks/StockIn';
 import { Dropdown } from 'react-bootstrap';
@@ -10,6 +16,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import Barcode from 'react-barcode';
+import ChartComponent from './ChartComponent';
 
 const Dashboard = ({ sidebarMinimized }) => {
   const [products, setProducts] = useState([]);
@@ -209,12 +216,12 @@ const Dashboard = ({ sidebarMinimized }) => {
                 <td className="text-center justify-content-center">{product.productTitle}</td>
                 <td className="text-center justify-content-center">{product.category}</td>
                 <td className="text-center justify-content-center">{product.color}</td>
-                <td className="text-center justify-content-center">{product.productPrice}</td>
+                <td className="text-center justify-content-center">₱{product.productPrice}</td>
                 <td className="text-center justify-content-center">
-                  {product.productQuantity} Pairs
+                  {product.balance} Pairs
                 </td>
                 <td className="text-center justify-content-center">
-                  {product.sizeSystem} {product.productSize}
+                  {product.productSize}
                 </td>
                 <td className="text-center justify-content-center">{product.productBrand}</td>
                 <td className="text-center justify-content-center">{product.branch}</td>
