@@ -6,6 +6,8 @@ import {
   doc,
   collection,
   serverTimestamp,
+  getDocs,
+  setDoc
 } from 'firebase/firestore';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
@@ -21,7 +23,8 @@ const EditProduct = ({ product, id }) => {
   const [qrcodeUrl, setQrcodeUrl] = useState(product.qrcodeUrl);
   const [quantity, setQuantity] = useState(product.productQuantity);
   const [color, setColor] = useState(product.color);
-  const [branch, setBranch] = useState(product.branch);
+  const [type, setType] = useState(product.type);
+  // const [branch, setBranch] = useState(product.branch);
   const [category, setCategory] = useState(product.category);
   const [brand, setBrand] = useState(product.productBrand);
   const [sizeSystem, setSizeSystem] = useState(product.sizeSystem);
@@ -31,6 +34,8 @@ const EditProduct = ({ product, id }) => {
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('₱');
+  const [supplier, setSupplier] = useState(product.supplier);
+  const [branch, setBranch] = useState(product.branch);
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
@@ -44,8 +49,6 @@ const EditProduct = ({ product, id }) => {
 
     return () => unsubscribeAuth();
   }, []);
-
-
 
   const updateProduct = async (e) => {
     e.preventDefault();
@@ -93,19 +96,21 @@ const EditProduct = ({ product, id }) => {
 
       const productData = {
         productId,
-				barcodeId,
-				barcodeUrl,
-				qrcodeUrl,
+        barcodeId,
+        barcodeUrl,
+        qrcodeUrl,
         productTitle,
         productSize: parseInt(size),
         productQuantity: parseInt(quantity),
         color,
-        branch,
+        branch: branch,
         category,
         productBrand: brand,
         sizeSystem,
+        supplier: supplier,
         productDetails: details,
         productPrice: price,
+        productImage: downloadURL,
         updatedtime: serverTimestamp(),
       };
 
@@ -113,7 +118,7 @@ const EditProduct = ({ product, id }) => {
         productData.productImage = downloadURL;
       }
 
-      await updateDoc(docRef, productData);
+      await setDoc(docRef, productData);
       window.location.reload();
     } catch (err) {
       console.log(err);
@@ -140,7 +145,7 @@ const EditProduct = ({ product, id }) => {
         className="btn btn-outline-primary"
         data-bs-toggle="modal"
         data-bs-target={`#id${id}`}>
-        Edit Product
+        Edit
       </button>
 
       <div
@@ -155,7 +160,7 @@ const EditProduct = ({ product, id }) => {
               <h5
                 className="modal-title"
                 id="editLabel">
-                Update Product Details
+                Update Stock Details
               </h5>
               <button
                 type="button"
@@ -235,26 +240,28 @@ const EditProduct = ({ product, id }) => {
 										placeholder="Ex. 5.1"
 									/>
 								</div> */}
-                  <div className="mb-3">
+                   <div className="mb-3">
                     <label htmlFor="formGroupExampleInput" className="form-label">Size</label>
-                    <div className="input-group mb-3">
-                      <select
-                        className="form-select"
-                        value={sizeSystem}
-                        onChange={(e) => setSizeSystem(e.target.value)}
-                      >
-                        <option value="EU">EU</option>
-                        <option value="US">US</option>
-                        <option value="UK">UK</option>
-                      </select>
+                    <div className="input-group mb-1">
                       <input
-                        type="number"
+                        type="text"
                         value={size}
-                        onChange={(e) => setSize(e.target.value)}
+                        onChange={setSize}
                         className="form-control"
-                        placeholder="39.5"
+                        placeholder="0"
+                        aria-label=""
                       />
                     </div>
+                  </div>
+                  <div class='mb-3'>
+                    <label for="formGroupExampleInput" class="form-label">Supplier</label>
+                    <input
+                      type="text"
+                      value={supplier}
+                      onChange={(e) => setSupplier(e.target.value)}
+                      className="form-control"
+                      placeholder=""
+                    />
                   </div>
                 </div>
                 <div className='col-md-3'>
@@ -285,7 +292,7 @@ const EditProduct = ({ product, id }) => {
                       value={branch}
                       onChange={(e) => setBranch(e.target.value)}
                       className="form-control"
-                      placeholder="Ex. CDO Branch"
+                      placeholder=""
                     />
                   </div>
 
@@ -324,20 +331,30 @@ const EditProduct = ({ product, id }) => {
                       placeholder="Basketball Shoes"
                     />
                   </div>
+                  <div class='mb-3'>
+                    <label for="formGroupExampleInput" class="form-label">Category</label>
+                    <input
+                      type="text"
+                      value={type}
+                      onChange={(e) => setType(e.target.value)}
+                      className="form-control"
+                      placeholder=""
+                    />
+                  </div>
 
 
                 </div>
                 <div className='col px-md-5 mt-3'>
                   <div class='mb-3'>
                     <label for="exampleFormControlTextarea1" class="form-label">Details</label>
-                    <textarea 
-                    type="text"
-                    value={details}
-                    onChange={(e) => setDetails(e.target.value)}
-                    class="form-control" 
-                    placeholder="Product details"
-                    id="exampleFormControlTextarea1" 
-                    rows="3"
+                    <textarea
+                      type="text"
+                      value={details}
+                      onChange={(e) => setDetails(e.target.value)}
+                      class="form-control"
+                      placeholder="Product details"
+                      id="exampleFormControlTextarea1"
+                      rows="3"
                     >
                     </textarea>
                     {/* <input
@@ -359,13 +376,13 @@ const EditProduct = ({ product, id }) => {
                 data-bs-dismiss="modal">Close
               </button>
               <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={updateProduct}
-              disabled={loading}
-            >
-              {loading ? 'Updating...' : 'Update'}
-            </button>
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={updateProduct}
+                disabled={loading}
+              >
+                {loading ? 'Updating...' : 'Update'}
+              </button>
             </div>
           </form>
         </div>

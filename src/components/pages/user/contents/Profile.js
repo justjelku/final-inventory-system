@@ -17,10 +17,10 @@ const ProfileTabContent = () => {
 	// STATE
 	const [user, setUser] = useState([]);
 	const [photo, setPhoto] = useState(null);
-	const [firstName, setFirstName] = useState('');
-	const [lastName, setLastName] = useState('');
-	const [username, setUsername] = useState('');
-	const [email, setEmail] = useState('');
+	const [setFirstName] = useState('');
+	const [setLastName] = useState('');
+	const [setUsername] = useState('');
+	const [setEmail] = useState('');
 	const [password, setPassword] = useState('');
 
 	useEffect(() => {

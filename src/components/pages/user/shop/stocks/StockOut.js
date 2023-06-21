@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, getDocs, serverTimestamp, doc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, serverTimestamp, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, storage } from '../../../../../firebase';
 import { Modal } from 'react-bootstrap';
@@ -8,18 +8,10 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
 const StockOut = ({ product, show, onClose }) => {
-  const suppliersRef = collection(
-    db,
-    'todos',
-    'f3adC8WShePwSBwjQ2yj',
-    'basic_users',
-    'm831SaFD4oCioO6nfTc7',
-    'suppliers'
-  );
-  const [productId, setProductId] = useState(product.productId);
-  const [barcodeId, setBarcodeId] = useState(product.barcodeId);
-  const [barcodeUrl, setBarcodeUrl] = useState(product.barcodeUrl);
-  const [qrcodeUrl, setQrcodeUrl] = useState(product.qrcodeUrl);
+  const [productId] = useState(product.productId);
+  const [barcodeId] = useState(product.barcodeId);
+  const [barcodeUrl] = useState(product.barcodeUrl);
+  const [qrcodeUrl] = useState(product.qrcodeUrl);
   const [productTitle, setProductTitle] = useState(product.productTitle);
   const [size, setSize] = useState(product.productSize);
   const [quantity, setQuantity] = useState(product.productQuantity);
@@ -28,13 +20,14 @@ const StockOut = ({ product, show, onClose }) => {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [category, setCategory] = useState(product.category);
   const [brand, setBrand] = useState(product.productBrand);
-  const [sizeSystem, setSizeSystem] = useState(product.sizeSystem);
+  const [sizeSystem] = useState(product.sizeSystem);
   const [details, setDetails] = useState(product.productDetails);
   const [price, setPrice] = useState(product.productPrice);
   const [image, setImage] = useState(product.productImage);
-  const [progresspercent, setProgresspercent] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [currency, setCurrency] = useState('₱');
+  const [setProgresspercent] = useState(0);
+  const [setLoading] = useState(false);
+  const [setCurrency] = useState('₱');
+  const [type, setType] = useState(product.type);
   const [supplier, setSupplier] = useState([])
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -77,6 +70,14 @@ const StockOut = ({ product, show, onClose }) => {
   }, [userId]);
 
   useEffect(() => {
+    const suppliersRef = collection(
+      db,
+      'todos',
+      'f3adC8WShePwSBwjQ2yj',
+      'basic_users',
+      'm831SaFD4oCioO6nfTc7',
+      'suppliers'
+    );
     const getSupplier = async () => {
       await getDocs(suppliersRef).then((supplier) => {
         let supplierData = supplier.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
@@ -120,6 +121,31 @@ const StockOut = ({ product, show, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    const getSupplier = async () => {
+      const suppliersRef = collection(
+        db,
+        'users',
+        'qIglLalZbFgIOnO0r3Zu',
+        'basic_users',
+        userId,
+        'suppliers'
+      );
+
+      try {
+        const querySnapshot = await getDocs(suppliersRef);
+        const supplierData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        setSupplier(supplierData);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (userId) {
+      getSupplier();
+    }
+  }, [userId]);
+
   const getLastProductId = () => {
     const random = Math.floor(Math.random() * 100000);
     const user = firebase.auth().currentUser;
@@ -156,9 +182,16 @@ const StockOut = ({ product, show, onClose }) => {
       const stocksRef = doc(productRef, 'stock_history', stockoutId);
       const stockhistoryRef = doc(stockRef, stockoutId);
       const stockOutData = {
-        stockId: stockoutId,
+        stockoutId, stockoutId,
+        productId: productId,
+        userId: userId,
+        barcodeId,
+        type,
+        barcodeUrl,
+        qrcodeUrl,
         productTitle,
-        productSize: parseInt(size),
+        balance: parseInt(product.productQuantity) - parseInt(quantity),
+        productSize: size,
         productQuantity: parseInt(quantity),
         color,
         branch: selectedBranch ? selectedBranch.branchName : '',
@@ -167,23 +200,30 @@ const StockOut = ({ product, show, onClose }) => {
         productBrand: brand,
         sizeSystem,
         productDetails: details,
-        productPrice: price,
+        productPrice: parseInt(price) * parseInt(quantity),
         supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         createdtime: serverTimestamp(),
         updatedtime: serverTimestamp()
       };
 
       const productData = {
+        userId,
+        productId,
+        barcodeId,
+        type,
+        barcodeUrl,
+        qrcodeUrl,
         productTitle,
-        productSize: parseInt(size),
+        productSize: size,
         productQuantity: parseInt(product.productQuantity) - parseInt(quantity),
         color,
-        branch,
+        branch: selectedBranch ? selectedBranch.branchName : '',
         category,
+        supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         productBrand: brand,
         sizeSystem,
         productDetails: details,
-        productPrice: price,
+        productPrice: parseInt(price),
         updatedtime: serverTimestamp()
       };
 
@@ -269,22 +309,14 @@ const StockOut = ({ product, show, onClose }) => {
             </div>
             <div className="mb-3">
               <label htmlFor="formGroupExampleInput" className="form-label">Size</label>
-              <div className="input-group mb-3">
-                <select
-                  className="form-select"
-                  value={sizeSystem}
-                  onChange={(e) => setSizeSystem(e.target.value)}
-                >
-                  <option value="EU">EU</option>
-                  <option value="US">US</option>
-                  <option value="UK">UK</option>
-                </select>
+              <div className="input-group mb-1">
                 <input
-                  type="number"
+                  type="text"
                   value={size}
-                  onChange={(e) => setSize(e.target.value)}
+                  onChange={setSize}
                   className="form-control"
-                  placeholder="39.5"
+                  placeholder="0"
+                  aria-label=""
                 />
               </div>
             </div>
@@ -393,6 +425,19 @@ const StockOut = ({ product, show, onClose }) => {
                 className="form-control"
               >
                 <option value="Basketball Shoes">Basketball Shoes</option>
+              </select>
+            </div>
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Type</label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="form-control"
+              >
+                <option value="High Top Sneakers">High Top Sneakers</option>
+                <option value="Mid-Top Sneakers">Mid-Top Sneakers</option>
+                <option value="Low Top Sneakers">Low Top Sneakers</option>
+                <option value="Performance Sneakers">Performance Sneakers</option>
               </select>
             </div>
 

@@ -10,8 +10,8 @@ import WelcomePage from './WelcomePage';
 import Sidebarss from './navigation/sidebars';
 
 const RootPage = () => {
-  const [isMobileView, setIsMobileView] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [setIsMobileView] = useState(false);
+  const [setIsScrolled] = useState(false);
 
   useEffect(() => {
     // Function to check if the current view is mobile

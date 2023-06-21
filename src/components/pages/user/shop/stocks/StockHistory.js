@@ -9,10 +9,9 @@ import html2pdf from 'html2pdf.js';
 
 const ProductHistoryModal = ({ show, onClose, product }) => {
   const [productHistory, setProductHistory] = useState([]);
-  const [productId, setProductId] = useState(product.productId);
-  const [productTitle, setProductTitlte] = useState(product.productTitle);
-  const [quantity, setQuantity] = useState(product.productQuantity);
-  const [branch, setBranch] = useState(product.branch);
+  const [productId] = useState(product.productId);
+  const [productTitle] = useState(product.productTitle);
+  const [quantity] = useState(product.productQuantity);
   const [userId, setUserId] = useState(null);
   const modalRef = useRef(null);
 
@@ -44,17 +43,17 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
           )
         ),
         (querySnapshot) => {
-          let productData = [];
-          querySnapshot.forEach((doc) => {
-            productData.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
-          });
-          setProductHistory(productData); // Assuming there is only one user document
+          const historyData = querySnapshot.docs
+            .filter((doc) => doc.data()) // Filter docs by productId
+            .map((doc) => ({ id: doc.id, ...doc.data() }))
+            .sort((a, b) => a.createdAt - b.createdAt); // Sort in descending order based on createdAt field
+          setProductHistory(historyData); // Assuming there is only one user document
         }
       );
 
       return () => unsubscribe();
     }
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     const fetchProductHistory = async () => {
@@ -71,7 +70,10 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
         );
 
         const querySnapshot = await getDocs(collectionRef);
-        const historyData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const historyData = querySnapshot.docs
+          .filter((doc) => doc.data()) // Filter docs by productId
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .sort((a, b) => b.createdAt - a.createdAt); // Sort in descending order based on createdAt field
         setProductHistory(historyData);
       } catch (error) {
         console.log('Error fetching product history:', error);
@@ -79,7 +81,10 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
     };
 
     fetchProductHistory();
-  }, []);
+  }, [productId]);
+
+
+
 
   const getTotalQuantity = () => {
     let totalQuantity = 0;
@@ -98,7 +103,7 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
     });
     return totalQuantity;
   };
-  
+
 
   const getTotalStockIn = () => {
     let totalQuantity = 0;
@@ -109,64 +114,71 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
     });
     return totalQuantity;
   };
-  
+
 
   const handleExport = () => {
     const modalContent = document.getElementById('modalContent');
-    html2pdf().from(modalContent).save('stockcard.pdf');
+    const options = {
+      filename: 'stockcard.pdf',
+      orientation: 'landscape' // Set the paper orientation to landscape
+    };
+    html2pdf().set(options).from(modalContent).save();
   };
-  
-  const handlePrintAsPdf = () => {
-    if (modalRef.current) {
-      const printWindow = window.open('', '_blank');
-      const modalContent = document.getElementById('modalContent');
-      // const modalContent = modalRef.current.innerHTML;
-      const htmlContent = `
-        <html>
-          <head>
-            <title>Product History</title>
-            <style>
-              /* Add custom styles for the PDF print */
-              /* Example styles: */
-              @page {
-                size: landscape;
-              }
-              h6 { font-weight: bold; }
-              .row { margin-bottom: 10px; }
-            </style>
-          </head>
-          <body>
-            ${modalContent}
-          </body>
-        </html>
-      `;
-      printWindow.document.open();
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      printWindow.print();
-    }
-  };
-  
+
+  // const sortedProductHistory = [...productHistory].sort((a, b) => {
+  //   const dateA = new Date(a.createdAt?.toDate());
+  //   const dateB = new Date(b.createdAt?.toDate());
+  //   return dateB - dateA; // Sort in descending order based on createdAt field
+  // }).reverse(); // Reverse the sorted array to achieve LIFO sorting
+
+  // const lastDate = sortedProductHistory.length > 0 ? sortedProductHistory[0].createdAt : null;
+  // const remainingHistory = sortedProductHistory.slice(1);
+
+  const sortedProductHistory = [...productHistory].sort((a, b) => {
+    const timeA = new Date(a.createdtime?.toDate());
+    const timeB = new Date(b.createdtime?.toDate());
+    return timeA - timeB; // Sort in ascending order based on createdtime field
+  });
+
+  // const lastDate = sortedProductHistory.length > 0 ? sortedProductHistory[sortedProductHistory.length - 1].createdtime?.toDate() : null;
+  // const remainingHistory = sortedProductHistory.slice(0, sortedProductHistory.length - 1);
+
   return (
     <Modal show={show} onHide={onClose} size="lg" ref={modalRef}>
-      <Modal.Header closeButton>
-        <Modal.Title>Stock History for {product.productTitle}</Modal.Title>
-      </Modal.Header>
+      {/* <Modal.Header closeButton>
+        <Modal.Title>Stock Card for {product.productTitle}</Modal.Title>
+      </Modal.Header> */}
       <Modal.Body id="modalContent">
+        <h4>
+          <strong>Stock Card for {product.productTitle}</strong>
+        </h4>
         <div>
           <strong>Product Name:</strong> {productTitle}
         </div>
         <div>
           <strong>Product ID:</strong> {productId}
         </div>
+        <div>
+          <strong>Category:</strong> {product.category}
+        </div>
+        <div>
+          <strong>Type:</strong> {product.type}
+        </div>
+        <div>
+          <strong>Price:</strong> {product.productPrice}
+        </div>
+        <div>
+          <strong>Color:</strong> {product.color}
+        </div>
         <p>
-          <strong>Current Quantity:</strong> {quantity} pairs
+          <strong>Current Stocks:</strong> {quantity} pairs
         </p>
 
         <div></div>
-        <div className="row">
+
+        <div className="row align-items-center">
           <div className="col">
-            <h6>Date</h6>
+            <h6>Date Stock</h6>
           </div>
           <div className="col">
             <h6>Supplier</h6>
@@ -175,23 +187,52 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
             <h6>Quantity</h6>
           </div>
           <div className="col">
+            <h6>Balance</h6>
+          </div>
+          <div className="col">
+            <h6>Price</h6>
+          </div>
+          <div className="col">
             <h6>Branch</h6>
           </div>
           <div className="col">
-            <h6>Type</h6>
+            <h6>Remark</h6>
           </div>
         </div>
-        {productHistory.map((historyItem) => (
-          <div className="row" key={historyItem.id}>
-            <div className="col">{historyItem.createdtime?.toDate().toLocaleDateString()}</div>
-            <div className="col">{historyItem.supplier}</div>
-            <div className="col">{historyItem.productQuantity} pairs</div>
-            <div className="col">{historyItem.branch}</div>
-            <div className="col">{historyItem.stock}</div>
-          </div>
-        ))}
+
+        {productHistory
+          .sort((a, b) => {
+            const dateA = a.createdtime?.toDate();
+            const dateB = b.createdtime?.toDate();
+            return dateA - dateB;
+          })
+          .map((historyItem) => (
+            <div className="row border-top align-items-center" key={historyItem.id}>
+              <div className="col">
+                {historyItem.createdtime?.toDate()?.toLocaleDateString([], {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+                <br />
+                {historyItem.createdtime?.toDate()?.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
+              <div className="col">{historyItem.supplier}</div>
+              <div className="col">{historyItem.productQuantity} pairs</div>
+              <div className="col">{historyItem.balance} pairs</div>
+              <div className="col">{historyItem.productPrice}</div>
+              <div className="col">{historyItem.branch}</div>
+              <div className="col">{historyItem.stock}</div>
+            </div>
+          ))}
+
+
+
         <p></p>
-        <div className="row">
+        {/* <div className="row">
           <div className="col">
             <h6>Stock In</h6>
           </div>
@@ -217,7 +258,7 @@ const ProductHistoryModal = ({ show, onClose, product }) => {
           <div className="col">{getTotalQuantity()} pairs</div>
           <div className="col"></div>
           <div className="col"></div>
-        </div>
+        </div> */}
       </Modal.Body>
       <Modal.Footer>
         <button className="btn btn-secondary" onClick={onClose}>

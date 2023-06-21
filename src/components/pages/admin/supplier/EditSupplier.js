@@ -10,7 +10,6 @@ const EditSupplier = ({ show, suppliers, onClose }) => {
   const [supplierName, setSupplierName] = useState(suppliers.supplierName);
   const [supplierAddress, setSupplierAddress] = useState(suppliers.supplierAddress);
   const [contactNumber, setContactNumber] = useState(suppliers.contactNumber);
-  const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
 

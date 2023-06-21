@@ -1,12 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getFirestore } from 'firebase/firestore';
-import { GoogleAuthProvider, signInWithPopup, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signOut } from 'firebase/auth';
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  onAuthStateChanged, 
+  // sendPasswordResetEmail, 
+  signOut 
+} from 'firebase/auth';
 import {
   query,
   getDocs,
   collection,
   where,
-  addDoc,
   setDoc,
   doc,
   serverTimestamp,
@@ -14,33 +21,16 @@ import {
 } from "firebase/firestore";
 import { updatePassword } from "firebase/auth";
 import { db } from '../firebase';
-import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import AnimatedImage from '../components/animation/AnimateImage';
-
-
-
-// const firebaseConfig = {
-//   apiKey: "AIzaSyDoH11PS0y0rAm3koscH3VQNlkmv26bwuY",
-//   authDomain: "my-anonymity-app.firebaseapp.com",
-//   databaseURL: "https://my-anonymity-app-default-rtdb.firebaseio.com",
-//   projectId: "my-anonymity-app",
-//   storageBucket: "my-anonymity-app.appspot.com",
-//   messagingSenderId: "149998370320",
-//   appId: "1:149998370320:web:038ecbe5e259727b501495"
-// };
-// // Initialize Firebase app
-// const firebaseApp = initializeApp(firebaseConfig);
-// const auth = getAuth(firebaseApp);
-// const firestore = getFirestore(firebaseApp);
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [setError] = useState(null);
   const auth = getAuth();
 
   const signIn = async (email, password) => {
@@ -123,7 +113,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
   const createUser = async (email, password) => {
     try {
       const auth = getAuth();
@@ -134,18 +123,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
-
-  const sendPasswordReset = async (email) => {
-    try {
-      const auth = getAuth()
-      await sendPasswordResetEmail(auth, email);
-      alert("Password reset link sent!");
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
-    }
-  };
+  // const sendPasswordReset = async (email) => {
+  //   try {
+  //     const auth = getAuth()
+  //     await sendPasswordResetEmail(auth, email);
+  //     alert("Password reset link sent!");
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert(err.message);
+  //   }
+  // };
 
   const updateProfile = async (firstName, lastName, username, email, password) => {
     try {
@@ -181,7 +168,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
   const googleProvider = new GoogleAuthProvider();
   const signInWithGoogle = async () => {
     try {
@@ -214,7 +200,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
   const logout = async () => {
     try {
       await signOut(auth);
@@ -239,8 +224,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, []);
-
+  }, [auth]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -256,7 +240,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [auth]);
 
   // useEffect(() => {
   //   const authToken = localStorage.getItem('authToken');

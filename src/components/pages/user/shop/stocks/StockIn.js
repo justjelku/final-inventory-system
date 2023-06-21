@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, getDocs, serverTimestamp, doc, setDoc, updateDoc, onSnapshot, query } from 'firebase/firestore';
+import { collection, getDocs, serverTimestamp, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, storage } from '../../../../../firebase';
 import { Modal } from 'react-bootstrap';
@@ -8,23 +8,24 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
 const StockIn = ({ show, product, onClose }) => {
-  const [productId, setProductId] = useState(product.productId);
-  const [barcodeId, setBarcodeId] = useState(product.barcodeId);
-  const [barcodeUrl, setBarcodeUrl] = useState(product.barcodeUrl);
-  const [qrcodeUrl, setQrcodeUrl] = useState(product.qrcodeUrl);
+  const [productId] = useState(product.productId);
+  const [barcodeId] = useState(product.barcodeId);
+  const [barcodeUrl] = useState(product.barcodeUrl);
+  const [qrcodeUrl] = useState(product.qrcodeUrl);
   const [productTitle, setProductTitle] = useState(product.productTitle);
   const [size, setSize] = useState(product.productSize);
   const [quantity, setQuantity] = useState(product.productQuantity);
   const [color, setColor] = useState(product.color);
   const [category, setCategory] = useState(product.category);
   const [brand, setBrand] = useState(product.productBrand);
-  const [sizeSystem, setSizeSystem] = useState(product.sizeSystem);
+  const [sizeSystem] = useState(product.sizeSystem);
   const [details, setDetails] = useState(product.productDetails);
   const [price, setPrice] = useState(product.productPrice);
   const [image, setImage] = useState(product.productImage);
-  const [progresspercent, setProgresspercent] = useState(0);
+  const [type, setType] = useState(product.type);
+  const [setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [currency, setCurrency] = useState('₱');
+  const [setCurrency] = useState('₱');
   const [branch, setBranch] = useState([])
   const [supplier, setSupplier] = useState([])
   const [selectedSupplier, setSelectedSupplier] = useState(null);
@@ -93,7 +94,7 @@ const StockIn = ({ show, product, onClose }) => {
     if (userId) {
       getSupplier();
     }
-  }, [userId]);
+  }, []);
 
   const updateProduct = async (e) => {
     e.preventDefault();
@@ -157,14 +158,14 @@ const StockIn = ({ show, product, onClose }) => {
         'stock'
       );
 
-      if (parseInt(quantity) > 200) {
-        alert('Critical alert: Quantity is at the maximum level!');
-        return;
-      }
-      if (parseInt(quantity) < 50) {
-        alert('Critical alert: Quantity is at the minimum level!');
-        return;
-      }
+      // if (parseInt(quantity) > 200) {
+      //   alert('Critical alert: Quantity is at the maximum level!');
+      //   return;
+      // }
+      // if (parseInt(quantity) < 50) {
+      //   alert('Critical alert: Quantity is at the minimum level!');
+      //   return;
+      // }
       const productRef = doc(collectionRef, productId);
       const docRef = doc(productRef, 'stock_in', stockinId);
       const stocksRef = doc(productRef, 'stock_history', stockinId);
@@ -174,11 +175,13 @@ const StockIn = ({ show, product, onClose }) => {
         userId: userId,
         productId,
         barcodeId,
+        type,
         barcodeUrl,
         qrcodeUrl,
         productTitle,
-        productSize: parseInt(size),
+        productSize: size,
         productQuantity: parseInt(quantity),
+        balance: parseInt(quantity) + parseInt(product.productQuantity),
         color,
         branch: selectedBranch ? selectedBranch.branchName : '',
         category,
@@ -186,10 +189,10 @@ const StockIn = ({ show, product, onClose }) => {
         sizeSystem,
         stock: 'Stock In',
         productDetails: details,
-        productPrice: price,
+        productPrice: parseInt(price) * parseInt(quantity),
         supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         createdtime: serverTimestamp(),
-        updatedtime: serverTimestamp()
+        // updatedtime: serverTimestamp()
       };
 
       const productData = {
@@ -197,17 +200,19 @@ const StockIn = ({ show, product, onClose }) => {
         productId,
         barcodeId,
         barcodeUrl,
+        type,
         qrcodeUrl,
         productTitle,
-        productSize: parseInt(size),
+        productSize: size,
         productQuantity: parseInt(quantity) + parseInt(product.productQuantity),
         color,
         branch: selectedBranch ? selectedBranch.branchName : '',
         category,
+        supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         productBrand: brand,
         sizeSystem,
         productDetails: details,
-        productPrice: price,
+        productPrice: parseInt(price),
         updatedtime: serverTimestamp()
       };
 
@@ -294,22 +299,14 @@ const StockIn = ({ show, product, onClose }) => {
             </div>
             <div className="mb-3">
               <label htmlFor="formGroupExampleInput" className="form-label">Size</label>
-              <div className="input-group mb-3">
-                <select
-                  className="form-select"
-                  value={sizeSystem}
-                  onChange={(e) => setSizeSystem(e.target.value)}
-                >
-                  <option value="EU">EU</option>
-                  <option value="US">US</option>
-                  <option value="UK">UK</option>
-                </select>
+              <div className="input-group mb-1">
                 <input
-                  type="number"
+                  type="text"
                   value={size}
-                  onChange={(e) => setSize(e.target.value)}
+                  onChange={setSize}
                   className="form-control"
-                  placeholder="39.5"
+                  placeholder="0"
+                  aria-label=""
                 />
               </div>
             </div>
@@ -420,6 +417,19 @@ const StockIn = ({ show, product, onClose }) => {
                 className="form-control"
               >
                 <option value="Basketball Shoes">Basketball Shoes</option>
+              </select>
+            </div>
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Type</label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="form-control"
+              >
+                <option value="High Top Sneakers">High Top Sneakers</option>
+                <option value="Mid-Top Sneakers">Mid-Top Sneakers</option>
+                <option value="Low Top Sneakers">Low Top Sneakers</option>
+                <option value="Performance Sneakers">Performance Sneakers</option>
               </select>
             </div>
 

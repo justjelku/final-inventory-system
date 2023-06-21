@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
@@ -13,7 +13,7 @@ import {
 import { db } from '../../../../firebase';
 
 const ProfileIcon = () => {
-	const [user, setUser] = useState(null);
+	const [setUser] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [userId, setUserId] = useState(null);
 

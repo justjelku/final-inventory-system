@@ -14,6 +14,7 @@ const AddProduct = () => {
 	const [color, setColor] = useState('');
 	const [category, setCategory] = useState('');
 	const [brand, setBrand] = useState('');
+	const [type, setType] = useState('');
 	const [sizeSystem, setSizeSystem] = useState('');
 	const [details, setDetails] = useState('');
 	const [price, setPrice] = useState('');
@@ -98,8 +99,12 @@ const AddProduct = () => {
 		setCurrency(e.target.value);
 	};
 
-	const handleSizeChange = (e) => {
+	const handleSizeSystem = (e) => {
 		setSizeSystem(e.target.value);
+	};
+
+	const handleSizeChange = (e) => {
+		setSize(e.target.value);
 	};
 
 	const handleImageChange = (event) => {
@@ -116,12 +121,16 @@ const AddProduct = () => {
 	};
 
 	const combinedValue = `${currency} ${price}`;
+	const combinedSize = `${sizeSystem} ${size}`;
+
+
 
 	const submitProduct = async (e) => {
 		e.preventDefault();
 		try {
 			setLoading(true);
 			const lastProductId = getLastProductId();
+			const stockinId = `2023${userId.substring(0, 6)}${lastProductId.substring(lastProductId.length - 8)}`;
 			const barcodeData = `2023${userId.substring(0, 4)}${lastProductId.substring(lastProductId.length - 3)}`;
 			const productId = `2023${userId.substring(0, 5)}${lastProductId.substring(lastProductId.length - 8)}`;
 
@@ -149,10 +158,23 @@ const AddProduct = () => {
 						userId,
 						'products',
 					);
+
+					const stockRef = collection(
+						db,
+						'users',
+						'qIglLalZbFgIOnO0r3Zu',
+						'basic_users',
+						userId,
+						'products',
+						productId,
+						'stock_history'
+					);
 					const docRef = doc(collectionRef, productId);
+					const stckRef = doc(stockRef, productId);
 					const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 					await setDoc(docRef, {
 						userId: userId,
+						stockinId: stockinId,
 						productId: productId,
 						barcodeId: barcodeData,
 						barcodeUrl: '',
@@ -162,13 +184,40 @@ const AddProduct = () => {
 						color: color,
 						category: category,
 						productBrand: brand,
-						type: '',
+						type: type,
 						supplier: selectedSupplier ? selectedSupplier.supplierName : '',
 						branch: selectedBranch ? selectedBranch.branchName : '',
-						productSize: parseInt(size),
+						productSize: combinedSize,
 						sizeSystem: sizeSystem,
 						productImage: downloadURL,
 						productQuantity: parseInt(quantity),
+						balance: parseInt(quantity),
+						productDetails: details,
+						createdtime: serverTimestamp(),
+						updatedtime: serverTimestamp(),
+					});
+
+					await setDoc(stckRef, {
+						userId: userId,
+						stockinId: stockinId,
+						stock: 'Stock In',
+						productId: productId,
+						barcodeId: barcodeData,
+						barcodeUrl: '',
+						qrcodeUrl: '',
+						productTitle: productTitle,
+						productPrice: parseInt(price)*parseInt(quantity),
+						color: color,
+						category: category,
+						productBrand: brand,
+						type: type,
+						supplier: selectedSupplier ? selectedSupplier.supplierName : '',
+						branch: selectedBranch ? selectedBranch.branchName : '',
+						productSize: combinedSize,
+						sizeSystem: sizeSystem,
+						productImage: downloadURL,
+						productQuantity: parseInt(quantity),
+						balance: parseInt(quantity),
 						productDetails: details,
 						createdtime: serverTimestamp(),
 						updatedtime: serverTimestamp(),
@@ -181,10 +230,10 @@ const AddProduct = () => {
 					setBrand('');
 					setBranch('');
 					setSize('');
-					setSizeSystem('');
+					// setSizeSystem('');
 					setQuantity('');
 					setDetails('');
-					window.location.reload();
+					// window.location.reload();
 				}
 			);
 		} catch (err) {
@@ -207,7 +256,7 @@ const AddProduct = () => {
 				>
 					<div className="modal-header">
 						<h5 className="modal-title" id="addModalLabel">
-							Add Product
+							Add Stock
 						</h5>
 						<button
 							type="button"
@@ -283,11 +332,34 @@ const AddProduct = () => {
 								</div> */}
 								<div className="mb-3">
 									<label htmlFor="formGroupExampleInput" className="form-label">Size</label>
+									<div className="input-group mb-1">
+										<select
+											className="form-select"
+											value={sizeSystem}
+											onChange={handleSizeSystem}
+										>
+											<option value="EU">EU</option>
+											<option value="US">US</option>
+											<option value="UK">UK</option>
+											{/* Add more currency options here */}
+										</select>
+										<input
+											type="number"
+											value={size}
+											onChange={handleSizeChange}
+											className="form-control"
+											placeholder="39.5"
+											aria-label="39.5"
+										/>
+									</div>
+								</div>
+								{/* <div className="mb-3">
+									<label htmlFor="formGroupExampleInput" className="form-label">Size</label>
 									<div className="input-group mb-3">
 										<select
 											className="form-select"
 											value={sizeSystem}
-											onChange={handleSizeChange}
+											onChange={handleSizeSystem}
 										>
 											<option value="EU">EU</option>
 											<option value="US">US</option>
@@ -296,12 +368,12 @@ const AddProduct = () => {
 										<input
 											type="number"
 											value={size}
-											onChange={(e) => setSize(e.target.value)}
+											onChange={(e) => handleSizeChange(e.target.value)}
 											className="form-control"
 											placeholder="39.5"
 										/>
 									</div>
-								</div>
+								</div> */}
 								<div className="mb-3">
 									<label htmlFor="supplier" className="form-label">Supplier</label>
 									{supplier.length > 0 ? (
@@ -394,8 +466,6 @@ const AddProduct = () => {
 											onChange={handleCurrencyChange}
 										>
 											<option value="₱">₱</option>
-											<option value="$">$</option>
-											<option value="€">€</option>
 											{/* Add more currency options here */}
 										</select>
 										<input
@@ -416,6 +486,19 @@ const AddProduct = () => {
 										className="form-control"
 									>
 										<option value="Basketball Shoes">Basketball Shoes</option>
+									</select>
+								</div>
+								<div class='mb-3'>
+									<label for="formGroupExampleInput" class="form-label">Type</label>
+									<select
+										value={type}
+										onChange={(e) => setType(e.target.value)}
+										className="form-control"
+									>
+										<option value="High Top Sneakers">High Top Sneakers</option>
+										<option value="Mid-Top Sneakers">Mid-Top Sneakers</option>
+										<option value="Low Top Sneakers">Low Top Sneakers</option>
+										<option value="Performance Sneakers">Performance Sneakers</option>
 									</select>
 								</div>
 

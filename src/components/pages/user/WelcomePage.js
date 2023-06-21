@@ -7,25 +7,24 @@ import { BsGraphUp, BsClock, BsClipboardData, BsCart } from 'react-icons/bs';
 import { db } from '../../../firebase';
 
 const WelcomePage = () => {
-  const [totalQuantities, setTotalQuantities] = useState(0);
-const [stockIn, setStockIn] = useState(0);
-const [productOut, setProductOut] = useState([]);
-const [totalStockOutQuantity, setTotalStockOutQuantity] = useState(0); // Declare the state variable
-const [totalStockInQuantity, setTotalStockInQuantity] = useState(0); 
-const [productIn, setProductIn] = useState([]);
-const [products, setProducts] = useState([]);
-const [userId, setUserId] = useState(null);
+  const [setTotalQuantities] = useState(0);
+  const [setStockIn] = useState(0);
+  const [setProductOut] = useState([]);
+  const [totalStockOutQuantity, setTotalStockOutQuantity] = useState(0); // Declare the state variable
+  const [totalStockInQuantity, setTotalStockInQuantity] = useState(0);
+  const [productIn, setProductIn] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [userId, setUserId] = useState(null);
 
 
   // STATE
-  const [showModal, setShowModal] = useState(false)
   const [user, setUser] = useState(null);
-  const [photo, setPhoto] = useState(null);
+  const [setPhoto] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
   const [selectedRows, setSelectedRows] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct] = useState(null);
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -212,11 +211,11 @@ const [userId, setUserId] = useState(null);
       console.log(`Total quantities: ${total}`);
       setTotalQuantities(total);
     };
-    
+
     if (userId) {
       getTotalQuantities();
     }
-  }, [userId]); 
+  }, [userId]);
 
   useEffect(() => {
     const getTotalStockIn = async () => {
@@ -248,7 +247,7 @@ const [userId, setUserId] = useState(null);
         setStockIn(total);
       }
     };
-  
+
     if (userId) {
       getTotalStockIn();
     }
@@ -270,92 +269,93 @@ const [userId, setUserId] = useState(null);
       console.log(`Total products with quantity greater than zero: ${nonZeroQtyCount}`);
       setProductIn(total);
     };
-    
+
     if (userId) {
       getTotalProductIn();
     }
   }, [userId]);
 
   useEffect(() => {
-		if (userId) {
-			const unsubscribe = onSnapshot(
-				query(
-					collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users'),
-					where('userId', '==', userId)
-				),
-				(querySnapshot) => {
-					let userArr = [];
-					querySnapshot.forEach((doc) => {
-						userArr.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
-					});
-					setUser(userArr[0]); // Assuming there is only one user document
-				}
-			);
+    if (userId) {
+      const unsubscribe = onSnapshot(
+        query(
+          collection(db, 'users', 'qIglLalZbFgIOnO0r3Zu', 'basic_users'),
+          where('userId', '==', userId)
+        ),
+        (querySnapshot) => {
+          let userArr = [];
+          querySnapshot.forEach((doc) => {
+            userArr.push({ id: doc.id, ...doc.data() }); // Include all fields in the object
+          });
+          setUser(userArr[0]); // Assuming there is only one user document
+        }
+      );
 
-			return () => unsubscribe();
-		}
-	}, [userId]);
-  
-  
+      return () => unsubscribe();
+    }
+  }, [userId]);
+
+
   return (
     <>
-    <h2 className='mt-3'>
-      Hi, {user && (
-        user['first name']
-      )}
-      (basic user)
-    </h2>
-    <div className="container mt-auto m-auto justify-content-center">
-      <div className="row">
-        <div className="col-lg-15">
-          <div className="row">
-            <div className="col-md-6">
-              <div className="card mb-4">
-                <div className="card-body">
-                  <div className="d-flex align-items-center">
-                    <BsGraphUp className="fs-5 me-3 text-primary" />
-                    <div>
-                      <h5 className="card-title">Total Stocks</h5>
-                      <p className="card-text">{totalStockInQuantity+totalStockOutQuantity+productIn}</p>
+      <h2 className='mt-3'>
+        Hi, {user && (
+          user['first name']
+        )}
+        (basic user)
+      </h2>
+      <div className="container mt-auto m-auto justify-content-center">
+        <div className="row">
+          <div className="col-lg-15">
+            <div className="row">
+              <div className="col-md-6">
+                <div className="card mb-4">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <BsGraphUp className="fs-5 me-3 text-primary" />
+                      <div>
+                        <h5 className="card-title">Total Stocks</h5>
+                        <p className="card-text">{totalStockInQuantity + totalStockOutQuantity + productIn}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="col-md-6">
-              <div className="card mb-4">
-                <div className="card-body">
-                  <div className="d-flex align-items-center">
-                    <BsClock className="fs-2 me-3 text-primary" />
-                    <div>
-                      <h5 className="card-title">Stock In</h5>
-                      <p className="card-text">{totalStockInQuantity}</p>
+              <div className="col-md-6">
+                <div className="card mb-4">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <BsClock className="fs-2 me-3 text-primary" />
+                      <div>
+                        <h5 className="card-title">Stock In</h5>
+                        <p className="card-text">{totalStockInQuantity}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="col-md-6">
-              <div className="card mb-4">
-                <div className="card-body">
-                  <div className="d-flex align-items-center">
-                    <BsClipboardData className="fs-2 me-3 text-primary" />
-                    <div>
-                      <h5 className="card-title">Stock Out</h5>
-                      <p className="card-text">{totalStockOutQuantity}</p>
+              <div className="col-md-6">
+                <div className="card mb-4">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <BsClipboardData className="fs-2 me-3 text-primary" />
+                      <div>
+                        <h5 className="card-title">Stock Out</h5>
+                        <p className="card-text">{totalStockOutQuantity}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="col-md-6">
-              <div className="card mb-4">
-                <div className="card-body">
-                  <div className="d-flex align-items-center">
-                    <BsCart className="fs-2 me-3 text-primary" />
-                    <div>
-                      <h5 className="card-title">Stocks</h5>
-                      <p className="card-text">{productIn}</p>
+              <div className="col-md-6">
+                <div className="card mb-4">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <BsCart className="fs-2 me-3 text-primary" />
+                      <div>
+                        <h5 className="card-title">Stocks</h5>
+                        <p className="card-text">{productIn}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -364,9 +364,8 @@ const [userId, setUserId] = useState(null);
           </div>
         </div>
       </div>
-    </div>
-    <h2>Recent Activities</h2>
-    <div className="table-responsive">
+      <h2>Recent Activities</h2>
+      <div className="table-responsive">
         <input
           type="search"
           className="form-control me-3"

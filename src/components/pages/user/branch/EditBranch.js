@@ -9,7 +9,6 @@ import 'firebase/compat/firestore';
 const EditBranch = ({ show, branchList, onClose }) => {
 	const [branchName, setBranchName] = useState(branchList.branchName);
 	const [branchAddress, setBranchAddress] = useState(branchList.branchAddress);
-	const [progresspercent, setProgresspercent] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [userId, setUserId] = useState(null);
 

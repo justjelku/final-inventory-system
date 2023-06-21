@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, getDocs, serverTimestamp, doc, setDoc, updateDoc, onSnapshot, query } from 'firebase/firestore';
+import { collection, getDocs, serverTimestamp, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, storage } from '../../../../../firebase';
 import { Modal } from 'react-bootstrap';
@@ -8,25 +8,26 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
 const StockIn = ({ show, product, onClose }) => {
-  const [productId, setProductId] = useState(product.productId);
-  const [barcodeId, setBarcodeId] = useState(product.barcodeId);
-  const [barcodeUrl, setBarcodeUrl] = useState(product.barcodeUrl);
-  const [qrcodeUrl, setQrcodeUrl] = useState(product.qrcodeUrl);
+  const [productId] = useState(product.productId);
+  const [barcodeId] = useState(product.barcodeId);
+  const [barcodeUrl] = useState(product.barcodeUrl);
+  const [qrcodeUrl] = useState(product.qrcodeUrl);
   const [productTitle, setProductTitle] = useState(product.productTitle);
   const [size, setSize] = useState(product.productSize);
   const [quantity, setQuantity] = useState(product.productQuantity);
   const [color, setColor] = useState(product.color);
   const [category, setCategory] = useState(product.category);
   const [brand, setBrand] = useState(product.productBrand);
-  const [sizeSystem, setSizeSystem] = useState(product.sizeSystem);
+  const [sizeSystem] = useState(product.sizeSystem);
   const [details, setDetails] = useState(product.productDetails);
   const [price, setPrice] = useState(product.productPrice);
   const [image, setImage] = useState(product.productImage);
+  const [type, setType] = useState(product.type);
   const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [currency, setCurrency] = useState('₱');
-  const [branch, setBranch] = useState([])
-  const [supplier, setSupplier] = useState([])
+  const [setCurrency] = useState('₱');
+  const [branch, setBranch] = useState(product.branch)
+  const [supplier, setSupplier] = useState(product.supplier)
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -43,90 +44,6 @@ const StockIn = ({ show, product, onClose }) => {
     return () => unsubscribeAuth();
   }, []);
 
-  useEffect(() => {
-    const getBranch = async () => {
-      const branchRef = collection(
-        db,
-        'users',
-        'qIglLalZbFgIOnO0r3Zu',
-        'basic_users',
-        userId,
-        'branch'
-      );
-
-      try {
-        const querySnapshot = await getDocs(branchRef);
-        const branchData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-        setBranch(branchData);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    if (userId) {
-      getBranch();
-    }
-  }, [userId]);
-
-
-
-  useEffect(() => {
-    const getSupplier = async () => {
-      const suppliersRef = collection(
-        db,
-        'users',
-        'qIglLalZbFgIOnO0r3Zu',
-        'basic_users',
-        userId,
-        'suppliers'
-      );
-
-      try {
-        const querySnapshot = await getDocs(suppliersRef);
-        const supplierData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-        setSupplier(supplierData);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    if (userId) {
-      getSupplier();
-    }
-  }, [userId]);
-
-  const updateProduct = async (e) => {
-    e.preventDefault();
-    try {
-      if (image && typeof image !== 'string') {
-        const storageRef = ref(storage, `products/productImage/${image.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, image);
-
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const progress = Math.round(
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            );
-            setProgresspercent(progress);
-          },
-          (error) => {
-            setLoading(false);
-            alert(error);
-          },
-          async () => {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            updateProductData(downloadURL);
-          }
-        );
-      } else {
-        updateProductData(null);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const getLastProductId = () => {
     const random = Math.floor(Math.random() * 100000);
     const user = firebase.auth().currentUser;
@@ -135,7 +52,7 @@ const StockIn = ({ show, product, onClose }) => {
     return `${userPrefix}${String(random).padStart(5, '0')}`;
   };
 
-  const updateProductData = async (downloadURL) => {
+  const updateProduct = async () => {
     try {
       const lastProductId = getLastProductId();
       const stockinId = `2023${userId.substring(0, 6)}${lastProductId.substring(lastProductId.length - 8)}`;
@@ -157,72 +74,78 @@ const StockIn = ({ show, product, onClose }) => {
         'stock'
       );
 
-      if (parseInt(quantity) > 200) {
-        alert('Critical alert: Quantity is at the maximum level!');
-        return;
-      }
-      if (parseInt(quantity) < 50) {
-        alert('Critical alert: Quantity is at the minimum level!');
-        return;
-      }
+      // if (parseInt(quantity) > 200) {
+      //   alert('Critical alert: Quantity is at the maximum level!');
+      //   return;
+      // }
+      // if (parseInt(quantity) < 50) {
+      //   alert('Critical alert: Quantity is at the minimum level!');
+      //   return;
+      // }
       const productRef = doc(collectionRef, productId);
       const docRef = doc(productRef, 'stock_in', stockinId);
       const stocksRef = doc(productRef, 'stock_history', stockinId);
       const stockhistoryRef = doc(stockRef, stockinId);
       const stockInData = {
-        stockinId, stockinId,
+        stockinId: stockinId,
+        productId: productId,
         userId: userId,
-        productId,
-        barcodeId,
-        barcodeUrl,
-        qrcodeUrl,
-        productTitle,
-        productSize: parseInt(size),
+        barcodeId: barcodeId,
+        type: type,
+        barcodeUrl: barcodeUrl,
+        qrcodeUrl: qrcodeUrl,
+        productTitle: productTitle,
+        balance: parseInt(product.balance) + parseInt(quantity),
+        productSize: size,
         productQuantity: parseInt(quantity),
-        color,
-        branch: selectedBranch ? selectedBranch.branchName : '',
-        category,
-        productBrand: brand,
-        sizeSystem,
+        color: color,
+        branch: branch,
+        category: category,
+        productImage: image,
         stock: 'Stock In',
-        productDetails: details,
-        productPrice: price,
-        supplier: selectedSupplier ? selectedSupplier.supplierName : '',
-        createdtime: serverTimestamp(),
-        // updatedtime: serverTimestamp()
-      };
-
-      const productData = {
-        userId,
-        productId,
-        barcodeId,
-        barcodeUrl,
-        qrcodeUrl,
-        productTitle,
-        productSize: parseInt(size),
-        productQuantity: parseInt(quantity) + parseInt(product.productQuantity),
-        color,
-        branch: selectedBranch ? selectedBranch.branchName : '',
-        category,
-        supplier: selectedSupplier ? selectedSupplier.supplierName : '',
         productBrand: brand,
-        sizeSystem,
+        sizeSystem: sizeSystem,
         productDetails: details,
-        productPrice: price,
+        productPrice: parseInt(price) * parseInt(quantity),
+        supplier: supplier,
+        createdtime: serverTimestamp(),
         updatedtime: serverTimestamp()
       };
 
-      if (downloadURL) {
-        productData.productImage = downloadURL;
-      }
+      const productData = {
+        productId: productId,
+        userId: userId,
+        barcodeId: barcodeId,
+        type: type,
+        barcodeUrl: barcodeUrl,
+        qrcodeUrl: qrcodeUrl,
+        productTitle: productTitle,
+        balance: parseInt(product.balance) + parseInt(quantity),
+        productSize: size,
+        productQuantity: parseInt(product.balance),
+        color: color,
+        branch: branch,
+        productImage: image,
+        category: category,
+        productBrand: brand,
+        sizeSystem: sizeSystem,
+        productDetails: details,
+        productPrice: parseInt(price),
+        supplier: branch,
+        createdtime: serverTimestamp(),
+        updatedtime: serverTimestamp(),
+      };
 
-      if (!selectedSupplier || !selectedSupplier.supplierName) {
-        alert('Please select a supplier');
-        return;
-      }
+      // if (downloadURL) {
+      //   productData.productImage = downloadURL;
+      // }
 
+      // if (!selectedSupplier || !selectedSupplier.supplierName) {
+      //   alert('Please select a supplier');
+      //   return;
+      // }
 
-      await updateDoc(productRef, productData);
+      await setDoc(productRef, productData);
       await setDoc(docRef, stockInData);
       await setDoc(stocksRef, stockInData);
       await setDoc(stockhistoryRef, stockInData);
@@ -291,30 +214,35 @@ const StockIn = ({ show, product, onClose }) => {
                 onChange={(e) => setProductTitle(e.target.value)}
                 className="form-control"
                 placeholder="Nike Air Zoom"
+                readOnly
               />
             </div>
             <div className="mb-3">
               <label htmlFor="formGroupExampleInput" className="form-label">Size</label>
-              <div className="input-group mb-3">
-                <select
-                  className="form-select"
-                  value={sizeSystem}
-                  onChange={(e) => setSizeSystem(e.target.value)}
-                >
-                  <option value="EU">EU</option>
-                  <option value="US">US</option>
-                  <option value="UK">UK</option>
-                </select>
+              <div className="input-group mb-1">
                 <input
-                  type="number"
+                  type="text"
                   value={size}
-                  onChange={(e) => setSize(e.target.value)}
+                  onChange={setSize}
                   className="form-control"
-                  placeholder="39.5"
+                  placeholder="0"
+                  aria-label=""
+                  readOnly
                 />
               </div>
             </div>
-            <div className="mb-3">
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Supplier</label>
+              <input
+                type="text"
+                value={supplier}
+                onChange={(e) => setSupplier(e.target.value)}
+                className="form-control"
+                placeholder=""
+                readOnly
+              />
+            </div>
+            {/* <div className="mb-3">
               <label htmlFor="supplier" className="form-label">Supplier</label>
               {supplier.length > 0 ? (
                 <select
@@ -337,8 +265,7 @@ const StockIn = ({ show, product, onClose }) => {
               ) : (
                 <p>Loading suppliers...</p>
               )}
-            </div>
-
+            </div> */}
           </div>
           <div className='col-md-3'>
             <div class='mb-3'>
@@ -359,9 +286,10 @@ const StockIn = ({ show, product, onClose }) => {
                 onChange={(e) => setColor(e.target.value)}
                 className="form-control"
                 placeholder="Ex. Black"
+                readOnly
               />
             </div>
-            <div class='mb-3'>
+            {/* <div class='mb-3'>
               <label htmlFor="branch" className="form-label">Branch</label>
               {branch.length > 0 ? (
                 <select
@@ -384,6 +312,17 @@ const StockIn = ({ show, product, onClose }) => {
               ) : (
                 <p>Loading branches...</p>
               )}
+            </div> */}
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Branch</label>
+              <input
+                type="text"
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                className="form-control"
+                placeholder=""
+                readOnly
+              />
             </div>
 
           </div>
@@ -419,8 +358,23 @@ const StockIn = ({ show, product, onClose }) => {
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="form-control"
+                readOnly
               >
                 <option value="Basketball Shoes">Basketball Shoes</option>
+              </select>
+            </div>
+            <div class='mb-3'>
+              <label for="formGroupExampleInput" class="form-label">Type</label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="form-control"
+                readOnly
+              >
+                <option value="High Top Sneakers">High Top Sneakers</option>
+                <option value="Mid-Top Sneakers">Mid-Top Sneakers</option>
+                <option value="Low Top Sneakers">Low Top Sneakers</option>
+                <option value="Performance Sneakers">Performance Sneakers</option>
               </select>
             </div>
 

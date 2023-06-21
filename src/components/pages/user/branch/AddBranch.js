@@ -1,6 +1,5 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../../firebase';
-import { storage } from '../../../../firebase';
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import firebase from 'firebase/compat/app';
@@ -8,10 +7,8 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
 const AddBranch = () => {
-  const [branchId, setBranchId] = useState('');
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
-  const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
 

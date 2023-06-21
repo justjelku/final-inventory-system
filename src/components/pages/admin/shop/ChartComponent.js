@@ -76,18 +76,20 @@ const ChartComponent = () => {
     // Filter products based on selected date
     const filteredProducts = selectedDate
       ? products.filter((product) => {
-          const updatedTime = product.updatedtime.toDate();
+          const updatedTime = product.createdtime.toDate();
           return updatedTime.toDateString() === selectedDate.toDateString();
         })
       : products;
 
-    // Update quantities based on filtered product data
-    filteredProducts.forEach((product) => {
-      const updatedTime = product.updatedtime.toDate();
-      const dayIndex = updatedTime.getDay();
-      const productQuantity = product.productQuantity;
-      quantitiesByDay[dayIndex] += productQuantity;
-    });
+      filteredProducts.forEach((product) => {
+        if (product.createdtime) {
+          const updatedTime = product.createdtime.toDate();
+          const dayIndex = updatedTime.getDay();
+          const productQuantity = product.productQuantity;
+          quantitiesByDay[dayIndex] += productQuantity;
+        }
+      });
+      
 
     chartRef.current = new Chart(ctx, {
       type: 'line',

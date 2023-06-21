@@ -10,7 +10,6 @@ const EditCustomer = ({ show, customers, onClose }) => {
   const [customerName, setCustomerName] = useState(customers.customerName);
   const [customerAddress, setCustomerAddress] = useState(customers.customerAddress);
   const [contactNumber, setContactNumber] = useState(customers.contactNumber);
-  const [progresspercent, setProgresspercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
 
